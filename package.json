@@ -1,0 +1,23 @@
+{
+  "name": "life-os-smart-netlify",
+  "version": "3.3.0",
+  "description": "AI-powered smart scheduler with Cloud Engineer transformation program",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build needed'",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "scheduler",
+    "cloud-engineering",
+    "claude-ai",
+    "netlify"
+  ],
+  "author": "Cloud Engineer",
+  "license": "MIT"
+}
