@@ -1,0 +1,2770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Life OS</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+button{border:none;cursor:pointer;font:inherit;background:none}
+input,select,textarea{font:inherit;background:none;border:none;outline:none;color:inherit}
+ul{list-style:none}
+
+:root{
+  --bg:#0D0D0F;--bg2:#141416;--bg3:#1C1C1F;--border:#2A2A2D;
+  --text:#F0F0F2;--text2:#9A9AA8;
+  --accent:#7C3AED;--success:#10B981;--warn:#F59E0B;--danger:#EF4444;
+  --prayer:#F59E0B;--study:#3B82F6;--meal:#10B981;
+  --sleep:#6366F1;--gym:#EF4444;--event:#8B5CF6;
+  --hh:56px;--nh:64px;--r:12px;--rs:8px;
+  --shadow:0 4px 24px rgba(0,0,0,.5);
+}
+body.light{--bg:#F5F5F7;--bg2:#fff;--bg3:#EBEBEF;--border:#DCDCE0;--text:#1A1A2E;--text2:#6B6B78}
+body.amoled{--bg:#000;--bg2:#0A0A0A;--bg3:#111}
+
+#app{display:flex;flex-direction:column;height:100%;background:var(--bg);color:var(--text)}
+header{display:flex;align-items:center;justify-content:space-between;height:var(--hh);padding:0 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100}
+#app-title{font-size:18px;font-weight:800;color:var(--accent)}
+#hdr-date{font-size:12px;color:var(--text2);margin-left:8px}
+#main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nh)+8px)}
+.page{display:none;padding:16px;animation:fi .2s ease}
+.page.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+#nav{display:flex;height:var(--nh);background:var(--bg2);border-top:1px solid var(--border);position:fixed;bottom:0;left:0;right:0;z-index:100;padding-bottom:env(safe-area-inset-bottom,0px)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text2);font-size:10px;padding:6px 0;min-height:44px;transition:color .2s}
+.nb .ni{font-size:19px;line-height:1}
+.nb.on{color:var(--accent)}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.sec{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:var(--rs);font-size:14px;font-weight:600;min-height:44px;transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.95)}
+.bp{background:var(--accent);color:#fff}
+.bs{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.bd{background:var(--danger);color:#fff}
+.bw2{background:var(--warn);color:#1a1a1a}
+.bg{color:var(--accent);padding:6px 10px;min-height:36px}
+.bsm{padding:6px 12px;font-size:13px;min-height:36px}
+.bicon{padding:8px;min-width:40px;min-height:40px;color:var(--text2);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.fab{position:fixed;bottom:calc(var(--nh)+14px);right:16px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;box-shadow:var(--shadow);z-index:50;display:flex;align-items:center;justify-content:center}
+
+.bwrap{background:var(--bg3);border-radius:99px;overflow:hidden}
+.bfill{height:100%;border-radius:99px;transition:width .5s ease}
+
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:13px;color:var(--text2);margin-bottom:5px}
+.fc{width:100%;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-size:15px}
+.fc:focus{border-color:var(--accent)}
+select.fc option{background:var(--bg)}
+
+.sr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.sc{background:var(--bg3);border-radius:var(--rs);padding:10px 6px;text-align:center}
+.sc .si{font-size:18px}
+.sc .sl{font-size:10px;color:var(--text2);display:block;margin:2px 0}
+.sc .sv{font-size:14px;font-weight:700}
+
+.rw{position:relative;width:110px;height:110px;flex-shrink:0}
+.rw svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.rl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.rp{font-size:24px;font-weight:800}
+
+/* Timeline */
+.tl{position:relative;padding-left:50px}
+.tb{position:relative;margin-bottom:6px;padding:10px 10px 10px 12px;border-left:3px solid var(--border);border-radius:var(--rs);background:var(--bg3)}
+.tb.cp{border-color:var(--prayer);background:rgba(245,158,11,.07)}
+.tb.cs{border-color:var(--study);background:rgba(59,130,246,.07)}
+.tb.cm{border-color:var(--meal);background:rgba(16,185,129,.07)}
+.tb.csl{border-color:var(--sleep);background:rgba(99,102,241,.07)}
+.tb.ce{border-color:var(--gym);background:rgba(239,68,68,.07)}
+.tb.cev{border-color:var(--event);background:rgba(139,92,246,.07)}
+.tb.done{opacity:.4}
+.tb.shifted{border-left-style:dashed}
+.tb.carryover{border-color:var(--warn);background:rgba(245,158,11,.07)}
+.tb.overflow{border-color:var(--danger);background:rgba(239,68,68,.1)}
+.tb.missed{opacity:.35;background:var(--bg)}
+.tt{position:absolute;left:-50px;width:44px;text-align:right;font-size:10px;color:var(--text2);top:12px;line-height:1.3}
+.tname{font-size:14px;font-weight:600;margin-bottom:2px;padding-right:4px}
+.tmeta{font-size:11px;color:var(--text2);line-height:1.5}
+.tacts{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.pill{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--bg);color:var(--text2);display:inline-block}
+.pill-warn{background:rgba(245,158,11,.2);color:var(--warn)}
+.pill-danger{background:rgba(239,68,68,.2);color:var(--danger)}
+.pill-ok{background:rgba(16,185,129,.2);color:var(--success)}
+.pill-info{background:rgba(124,58,237,.2);color:var(--accent)}
+
+/* Wake panel */
+.wake-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.wake-row{display:flex;align-items:center;gap:10px}
+.wake-box{flex:1;background:var(--bg3);border-radius:var(--rs);padding:10px;text-align:center}
+.wake-label{font-size:10px;color:var(--text2);display:block;margin-bottom:3px}
+.wake-val{font-size:18px;font-weight:800;display:block}
+.wake-delta{font-size:12px;color:var(--text2);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+
+/* Carryover panel */
+.co-panel{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.3);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.co-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(245,158,11,.15)}
+.co-item:last-child{border-bottom:none}
+
+/* Missed section */
+.missed-panel{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);padding:14px;margin-bottom:10px}
+
+/* Future events upcoming strip */
+.upcoming-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;margin-bottom:4px}
+.upcoming-card{background:var(--bg3);border-radius:var(--rs);padding:10px 12px;white-space:nowrap;border-left:3px solid var(--event);flex-shrink:0;min-width:130px}
+
+/* Sleep chart */
+.sbar{display:flex;align-items:flex-end;gap:4px;height:80px}
+.sbar-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.sbar-fill{width:100%;border-radius:3px 3px 0 0;min-height:4px}
+
+/* Stars */
+.stars{display:flex;gap:4px}
+.star{font-size:26px;color:var(--border);cursor:pointer;transition:color .1s;line-height:1;min-width:36px;text-align:center}
+.star.on{color:var(--warn)}
+
+/* Habit */
+.hc{display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:var(--rs);padding:12px;margin-bottom:8px;border-left:3px solid var(--border)}
+.hc.done{border-color:var(--success)}
+.hi{flex:1}
+.hn{font-size:14px;font-weight:600}
+.hs{font-size:12px;color:var(--text2)}
+.hbtn{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);color:var(--text2);font-size:15px;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+.hbtn.done{background:var(--success);border-color:var(--success);color:#fff}
+
+/* Goal */
+.gc{background:var(--bg3);border-radius:var(--rs);padding:12px;margin-bottom:8px;border-top:3px solid var(--border)}
+.ga{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.col-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);padding:6px 0;margin-bottom:4px}
+.kanban{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:580px){.kanban{grid-template-columns:repeat(3,1fr)}}
+
+/* Substance */
+.subc{background:var(--bg3);border-radius:var(--r);padding:14px;margin-bottom:10px;border-top:3px solid var(--success)}
+.cnt-row{display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0}
+.cbtn{width:44px;height:44px;border-radius:50%;background:var(--bg);border:1px solid var(--border);font-size:22px;display:flex;align-items:center;justify-content:center;color:var(--text)}
+.cval{font-size:28px;font-weight:800;min-width:50px;text-align:center}
+
+/* Stats */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sb{background:var(--bg3);border-radius:var(--rs);padding:12px;text-align:center}
+.sv{font-size:20px;font-weight:800;display:block}
+.sl2{font-size:10px;color:var(--text2);display:block;margin-top:2px}
+
+/* Settings */
+.sg-group{background:var(--bg2);border-radius:var(--r);padding:0 16px;margin-bottom:12px}
+.sg-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);padding:12px 0 4px}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);gap:8px}
+.srow:last-child{border-bottom:none}
+.theme-row{display:flex;gap:6px;width:100%}
+.tbtn{flex:1;padding:8px;border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:13px;border:2px solid transparent;transition:.2s}
+.tbtn.on{border-color:var(--accent);color:var(--accent)}
+.swatches{display:flex;gap:8px}
+.sw{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s;flex-shrink:0}
+.sw.on{border-color:var(--text)}
+.toggle{position:relative;width:48px;height:26px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.ttrack{position:absolute;inset:0;border-radius:99px;background:var(--border);cursor:pointer;transition:.3s}
+.ttrack::after{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.3s}
+.toggle input:checked+.ttrack{background:var(--accent)}
+.toggle input:checked+.ttrack::after{transform:translateX(22px)}
+
+/* Modal */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.mbg.open{display:flex}
+.mc{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:600px;padding:8px 16px 32px;max-height:88vh;overflow-y:auto;animation:su .25s ease}
+@keyframes su{from{transform:translateY(100%)}to{transform:none}}
+.mhandle{width:40px;height:4px;border-radius:99px;background:var(--border);margin:10px auto 14px}
+.mtitle{font-size:18px;font-weight:700;margin-bottom:16px}
+.macts{display:flex;gap:8px;margin-top:16px}
+.macts .btn{flex:1}
+
+/* Toast */
+#toast{position:fixed;top:calc(var(--hh)+8px);left:50%;transform:translateX(-50%) translateY(0);background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 16px;font-size:13px;z-index:300;white-space:nowrap;pointer-events:none;box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;transition:opacity .3s,transform .3s;border-left:3px solid var(--accent);max-width:90vw}
+#toast.out{opacity:0;transform:translateX(-50%) translateY(-8px)}
+
+.empty{text-align:center;color:var(--text2);padding:20px;font-size:13px}
+.warn-bar{background:rgba(239,68,68,.1);border-left:3px solid var(--danger);padding:8px 12px;border-radius:var(--rs);font-size:13px;color:var(--danger);margin-bottom:10px}
+.info-bar{background:rgba(124,58,237,.1);border-left:3px solid var(--accent);padding:10px 12px;border-radius:var(--rs);font-size:13px;margin-bottom:10px}
+.energy-chart{display:flex;align-items:flex-end;gap:2px;height:54px}
+.eb{flex:1;border-radius:2px 2px 0 0;min-height:3px}
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.qb{padding:12px;border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:13px;font-weight:600;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px}
+.util-f{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);padding-top:10px;gap:8px}
+.divider{height:1px;background:var(--border);margin:12px 0}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=range]{accent-color:var(--accent)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="app-title">Life OS</span>
+    <span id="hdr-date"></span>
+  </div>
+  <button class="bicon" onclick="App.reqNotif()">🔔</button>
+</header>
+
+<main id="main">
+
+<!-- DASHBOARD -->
+<section class="page active" id="page-dashboard">
+  <div style="margin-bottom:14px">
+    <h1 id="greeting" style="font-size:22px;font-weight:800;line-height:1.2"></h1>
+    <p id="greeting-sub" style="font-size:13px;color:var(--text2);margin-top:2px"></p>
+  </div>
+  <div id="late-banner" style="display:none" class="warn-bar"></div>
+  <div class="sr" id="sum-row"></div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div class="rw"><svg viewBox="0 0 110 110" width="110" height="110" id="ring-svg"></svg>
+        <div class="rl"><span class="rp" id="ring-pct">0%</span><span style="font-size:10px;color:var(--text2)">today</span></div></div>
+      <div style="flex:1" id="dash-bars"></div>
+    </div>
+    <p class="sec">Energy Forecast ⚡</p>
+    <div class="energy-chart" id="echart"></div>
+  </div>
+  <!-- Upcoming future events -->
+  <div class="card" id="upcoming-card" style="display:none">
+    <p class="sec">Upcoming Events 🗓️</p>
+    <div class="upcoming-strip" id="upcoming-strip"></div>
+  </div>
+  <div class="card">
+    <p class="sec">Habit Streaks 🔥</p>
+    <div id="habit-list"></div>
+    <button class="btn bs bsm" style="width:100%;margin-top:4px" onclick="App.openModal('modal-habit')">+ Add Habit</button>
+  </div>
+  <div class="card">
+    <p class="sec">Quick Log</p>
+    <div class="qg">
+      <button class="qb" onclick="App.nav('sleep')">😴 Log Sleep</button>
+      <button class="qb" onclick="App.openEvent('','meal','')">🍽️ Log Meal</button>
+      <button class="qb" onclick="App.openEvent('','study','')">📚 Log Study</button>
+      <button class="qb" onclick="App.openEvent('','exercise','')">🏋️ Exercise</button>
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec">Upcoming Today</p>
+    <div id="dash-rems"></div>
+  </div>
+</section>
+
+<!-- SCHEDULER -->
+<section class="page" id="page-scheduler">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <h1 style="font-size:20px;font-weight:800">📅 Schedule</h1>
+    <div style="display:flex;align-items:center;gap:4px">
+      <button class="bicon" onclick="App.prevDay()">‹</button>
+      <span id="sched-date" style="font-size:12px;white-space:nowrap;min-width:80px;text-align:center"></span>
+      <button class="bicon" onclick="App.nextDay()">›</button>
+    </div>
+  </div>
+
+  <!-- Sleep Time Input Panel (today only) -->
+  <div id="sleep-input-panel" class="wake-panel" style="display:none;background:var(--bg3);border-left:4px solid #818CF8;padding:14px;border-radius:var(--rs);margin-bottom:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <p class="sec" style="margin:0">😴 Sleep & Wake Time</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn bsm" style="background:#818CF8;color:#fff;min-height:34px" onclick="App.generateWithClaude()">🤖 Claude Schedule</button>
+        <button class="btn bsm" style="background:var(--text2);color:#fff;min-height:34px" onclick="App.loadSleepData()">Load Schedule</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:var(--bg);border-radius:var(--rs);padding:12px">
+        <label style="font-size:11px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Last Night Sleep Time</label>
+        <input type="time" id="inp-sleep-time" style="width:100%;font-size:16px;font-weight:700;text-align:center;background:none;border:none;color:var(--accent)" value="23:00" />
+        <div style="font-size:10px;color:var(--text2);margin-top:4px;text-align:center">🌙 When did you sleep?</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--rs);padding:12px">
+        <label style="font-size:11px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Today Wake Time</label>
+        <input type="time" id="inp-wake-time" style="width:100%;font-size:16px;font-weight:700;text-align:center;background:none;border:none;color:var(--warn)" />
+        <div style="font-size:10px;color:var(--text2);margin-top:4px;text-align:center">⏰ When did you wake?</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--bg);border-radius:var(--rs);padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--text2)">Sleep Duration</div>
+        <div style="font-size:16px;font-weight:700;color:#818CF8;margin-top:4px" id="sleep-duration">-- h</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--rs);padding:10px;text-align:center">
+        <div style="font-size:10px;color:var(--text2)">Prayer Status</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px" id="prayer-status">--</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      💡 Sleep & wake times auto-calculate prayer schedule, adjust meal times, and analyze sleep patterns
+    </div>
+  </div>
+
+  <!-- Wake Time Panel (today only) -->
+  <div id="wake-panel" class="wake-panel" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <p class="sec" style="margin:0">⏰ Wake Time</p>
+      <button class="btn bsm" style="background:var(--accent);color:#fff;min-height:34px" onclick="App.openModal('modal-wake')">Log Wake</button>
+    </div>
+    <div class="wake-row">
+      <div class="wake-box">
+        <span class="wake-label">Scheduled</span>
+        <span class="wake-val" id="wake-sched">06:00</span>
+      </div>
+      <div style="color:var(--text2);font-size:20px">→</div>
+      <div class="wake-box" id="wake-actual-box">
+        <span class="wake-label">Actual</span>
+        <span class="wake-val" id="wake-actual" style="color:var(--warn)">--</span>
+      </div>
+    </div>
+    <div class="wake-delta" id="wake-delta"></div>
+  </div>
+
+  <!-- Carryover Panel -->
+  <div id="co-panel" class="co-panel" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:700;color:var(--warn)">↩ Carried Over Tasks</span>
+      <button class="btn bg bsm" onclick="App.clearAllCarryover()">Clear</button>
+    </div>
+    <div id="co-list"></div>
+  </div>
+
+  <!-- Conflict / info bars -->
+  <div id="conflict-bar" style="display:none" class="warn-bar"></div>
+
+  <!-- Tab filter -->
+  <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px;-webkit-overflow-scrolling:touch" id="sched-tabs">
+    <button class="btn bp bsm" data-tab="all"      onclick="App.setTab(this,'all')">All</button>
+    <button class="btn bs bsm" data-tab="study"    onclick="App.setTab(this,'study')">Study</button>
+    <button class="btn bs bsm" data-tab="meal"     onclick="App.setTab(this,'meal')">Meals</button>
+    <button class="btn bs bsm" data-tab="prayer"   onclick="App.setTab(this,'prayer')">Prayer</button>
+    <button class="btn bs bsm" data-tab="sleep"    onclick="App.setTab(this,'sleep')">Sleep</button>
+    <button class="btn bs bsm" data-tab="exercise" onclick="App.setTab(this,'exercise')">Gym</button>
+    <button class="btn bs bsm" data-tab="event"    onclick="App.setTab(this,'event')">Events</button>
+  </div>
+
+  <div class="tl" id="timeline"></div>
+
+  <!-- Missed tasks section -->
+  <div id="missed-panel" style="display:none" class="missed-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:700;color:var(--danger)">⚠️ Missed / Skipped Tasks</span>
+      <span style="font-size:10px;color:var(--text2);padding:4px 8px;background:var(--bg3);border-radius:99px">Study tasks auto-rollover ↩</span>
+    </div>
+    <div id="missed-list"></div>
+  </div>
+
+  <div class="util-f" id="util-f"></div>
+  <button class="fab" onclick="App.openEvent('','study','')">+</button>
+</section>
+
+<!-- SLEEP -->
+<section class="page" id="page-sleep">
+  <h1 style="font-size:20px;font-weight:800;margin-bottom:14px">😴 Sleep Tracker</h1>
+  <div class="card">
+    <p class="sec">Log Sleep</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>Bedtime</label><input type="time" class="fc" id="inp-bed" value="23:00"/></div>
+      <div class="fg"><label>Wake Time</label><input type="time" class="fc" id="inp-wake" value="06:00"/></div>
+    </div>
+    <div class="fg"><label>Quality</label>
+      <div class="stars" id="stars">
+        <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
+        <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span>
+      </div>
+    </div>
+    <div class="fg"><label>Notes</label><textarea class="fc" id="inp-snotes" rows="2" placeholder="Dreams, disturbances..."></textarea></div>
+    <button class="btn bp" style="width:100%" onclick="App.logSleep()">Log Sleep</button>
+  </div>
+  <div class="card">
+    <p class="sec">Weekly Stats</p>
+    <div class="sg">
+      <div class="sb"><span class="sv" id="stat-avg">--</span><span class="sl2">Avg Duration</span></div>
+      <div class="sb"><span class="sv" id="stat-best">--</span><span class="sl2">Best Night</span></div>
+      <div class="sb"><span class="sv" id="stat-debt">--</span><span class="sl2">Sleep Debt</span></div>
+    </div>
+    <div class="sbar" id="sbar"></div>
+    <div style="display:flex;gap:4px;margin-top:4px" id="sbar-days"></div>
+  </div>
+  <div class="card"><p class="sec">History</p><ul id="sleep-hist"></ul></div>
+</section>
+
+<!-- ROADMAP -->
+<section class="page" id="page-roadmap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <h1 style="font-size:20px;font-weight:800">🗺️ Roadmap</h1>
+    <button class="btn bs bsm" onclick="App.openModal('modal-goal')">+ Goal</button>
+  </div>
+  <div class="card" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(99,102,241,.1));margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-weight:700;font-size:15px">💼 Job Readiness</span>
+      <span id="r-pct" style="font-size:26px;font-weight:800;color:var(--accent)">0%</span>
+    </div>
+    <div class="bwrap" style="height:8px"><div class="bfill" id="r-bar" style="background:var(--accent)"></div></div>
+    <p id="r-hint" style="font-size:12px;color:var(--text2);margin-top:6px"></p>
+  </div>
+  <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px">
+    <button class="btn bp bsm" data-hz="all"     onclick="App.setHz(this,'all')">All</button>
+    <button class="btn bs bsm" data-hz="weekly"  onclick="App.setHz(this,'weekly')">Week</button>
+    <button class="btn bs bsm" data-hz="monthly" onclick="App.setHz(this,'monthly')">Month</button>
+    <button class="btn bs bsm" data-hz="yearly"  onclick="App.setHz(this,'yearly')">Year</button>
+  </div>
+  <div class="kanban">
+    <div><div class="col-t">📋 To Do</div><div id="col-todo"></div></div>
+    <div><div class="col-t">⚡ In Progress</div><div id="col-ip"></div></div>
+    <div><div class="col-t">✅ Done</div><div id="col-done"></div></div>
+  </div>
+</section>
+
+<!-- ADDICTION -->
+<section class="page" id="page-addiction">
+  <h1 style="font-size:20px;font-weight:800;margin-bottom:4px">🧠 Addiction Tracker</h1>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Track habits you want to reduce or quit</p>
+  <div class="sg" id="streak-grid"></div>
+  <div id="subs-list"></div>
+  <div class="card">
+    <p class="sec">Urge Log</p>
+    <button class="btn bs bsm" style="margin-bottom:10px" onclick="App.openModal('modal-urge')">+ Log Urge</button>
+    <ul id="urge-list"></ul>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="page" id="page-settings">
+  <h1 style="font-size:20px;font-weight:800;margin-bottom:16px">⚙️ Settings</h1>
+  <div class="sg-group">
+    <p class="sg-title">Profile</p>
+    <div class="srow"><span>Name</span><input class="fc" style="width:140px;text-align:right;border:none;background:none" id="inp-name" placeholder="Your name"/></div>
+  </div>
+  <div class="sg-group">
+    <p class="sg-title">Schedule Defaults</p>
+    <div class="srow"><span>Scheduled Wake</span><input type="time" class="fc" style="width:110px" id="inp-wake-sched" value="06:00" oninput="App.setPref('scheduledWake',this.value)"/></div>
+    <div class="srow"><span>Bedtime</span><input type="time" class="fc" style="width:110px" id="inp-bed-sched" value="23:00" oninput="App.setPref('scheduledBed',this.value)"/></div>
+  </div>
+  <div class="sg-group">
+    <p class="sg-title">Appearance</p>
+    <div class="srow" style="flex-direction:column;align-items:flex-start;gap:8px"><span>Theme</span>
+      <div class="theme-row">
+        <button class="tbtn on" data-t="dark"   onclick="App.setTheme('dark',this)">Dark</button>
+        <button class="tbtn"    data-t="light"  onclick="App.setTheme('light',this)">Light</button>
+        <button class="tbtn"    data-t="amoled" onclick="App.setTheme('amoled',this)">AMOLED</button>
+      </div>
+    </div>
+    <div class="srow"><span>Accent</span>
+      <div class="swatches">
+        <div class="sw on"  data-c="#7C3AED" style="background:#7C3AED" onclick="App.setAccent('#7C3AED',this)"></div>
+        <div class="sw"     data-c="#2563EB" style="background:#2563EB" onclick="App.setAccent('#2563EB',this)"></div>
+        <div class="sw"     data-c="#059669" style="background:#059669" onclick="App.setAccent('#059669',this)"></div>
+        <div class="sw"     data-c="#DC2626" style="background:#DC2626" onclick="App.setAccent('#DC2626',this)"></div>
+        <div class="sw"     data-c="#D97706" style="background:#D97706" onclick="App.setAccent('#D97706',this)"></div>
+      </div>
+    </div>
+  </div>
+  <div class="sg-group">
+    <p class="sg-title">Notifications</p>
+    <div class="srow"><span>Permission</span><span id="notif-status" style="font-size:13px;color:var(--text2)">--</span></div>
+    <button class="btn bp" style="width:100%;margin:8px 0" onclick="App.reqNotif()">🔔 Enable Notifications</button>
+    <div style="font-size:11px;color:var(--text2);margin-top:8px">📢 Get alerts 5 min before each task · ⏰ Reminder when task starts · 📊 Daily progress report at midnight</div>
+  </div>
+  <div class="sg-group">
+    <p class="sg-title">Goals</p>
+    <div class="srow"><span>Sleep Target (hrs)</span><input type="number" class="fc" style="width:64px;text-align:center" id="inp-stgt" min="4" max="12" step="0.5" value="7" oninput="App.setPref('sleepTarget',parseFloat(this.value)||7)"/></div>
+    <div class="srow"><span>Study Target (hrs)</span><input type="number" class="fc" style="width:64px;text-align:center" id="inp-wtgt" min="0" max="16" step="0.5" value="6" oninput="App.setPref('studyTarget',parseFloat(this.value)||6)"/></div>
+  </div>
+  <div class="sg-group">
+    <p class="sg-title">AI Scheduler (Gemini)</p>
+    <div class="srow" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <span style="font-size:13px">Gemini API Key</span>
+      <input type="password" class="fc" style="width:100%;font-size:13px" id="inp-gemini-key" placeholder="AIza..." oninput="App.setPref('geminiKey',this.value)"/>
+      <span style="font-size:11px;color:var(--text2)">Get free key at aistudio.google.com · Stored locally only</span>
+    </div>
+  </div>
+  <div class="sg-group">
+    <p class="sg-title">Data</p>
+    <div class="srow"><span>Export JSON</span><button class="btn bs bsm" onclick="App.exportData()">Export</button></div>
+    <div class="srow"><span>Reset All Data</span><button class="btn bd bsm" id="reset-btn" onclick="App.resetStep()">Reset</button></div>
+  </div>
+</section>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav id="nav">
+  <button class="nb on" data-p="dashboard" onclick="App.nav('dashboard')"><span class="ni">🏠</span>Home</button>
+  <button class="nb"    data-p="scheduler" onclick="App.nav('scheduler')"><span class="ni">📅</span>Schedule</button>
+  <button class="nb"    data-p="sleep"     onclick="App.nav('sleep')"><span class="ni">😴</span>Sleep</button>
+  <button class="nb"    data-p="roadmap"   onclick="App.nav('roadmap')"><span class="ni">🗺️</span>Roadmap</button>
+  <button class="nb"    data-p="addiction" onclick="App.nav('addiction')"><span class="ni">🧠</span>Tracker</button>
+  <button class="nb"    data-p="settings"  onclick="App.nav('settings')"><span class="ni">⚙️</span>Settings</button>
+</nav>
+
+<!-- MODAL: LOG WAKE TIME -->
+<div class="mbg" id="modal-wake" onclick="App.closeModal('modal-wake')">
+  <div class="mc" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <p class="mtitle">⏰ Log Actual Wake Time</p>
+    <div class="info-bar" style="margin-bottom:14px;font-size:13px">Entering your actual wake time will automatically shift today's schedule forward. Prayer blocks remain fixed.</div>
+    <div class="fg"><label>I actually woke up at</label><input type="time" class="fc" id="inp-wake-actual" style="font-size:22px;text-align:center;padding:14px"/></div>
+    <div class="macts">
+      <button class="btn bp" onclick="App.logWake()">Apply & Rebuild Schedule</button>
+      <button class="btn bs" onclick="App.closeModal('modal-wake')">Cancel</button>
+    </div>
+    <button class="btn" style="width:100%;margin-top:8px;color:var(--danger);font-size:13px" onclick="App.clearWake()">✕ Clear Wake Override</button>
+  </div>
+</div>
+
+<!-- MODAL: ADD / EDIT EVENT -->
+<div class="mbg" id="modal-event" onclick="App.closeModal('modal-event')">
+  <div class="mc" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <p class="mtitle" id="ev-modal-title">Add Activity / Event</p>
+    <!-- DATE FIELD — supports future logging -->
+    <div class="fg">
+      <label>Date <span style="color:var(--accent);font-size:11px">(change for future events)</span></label>
+      <input type="date" class="fc" id="ev-date" style="font-size:15px"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>Start Time</label><input type="time" class="fc" id="ev-start"/></div>
+      <div class="fg"><label>End Time</label><input type="time" class="fc" id="ev-end"/></div>
+    </div>
+    <div class="fg"><label>Title</label><input type="text" class="fc" id="ev-title" placeholder="Activity / Event name"/></div>
+    <div class="fg"><label>Category</label>
+      <select class="fc" id="ev-cat">
+        <option value="study">📚 Study / Work</option>
+        <option value="meal">🍽️ Meal</option>
+        <option value="exercise">🏋️ Exercise / Gym</option>
+        <option value="event">📅 Job / Appointment</option>
+        <option value="sleep">😴 Sleep / Nap</option>
+        <option value="other">📌 Other</option>
+      </select>
+    </div>
+    <div class="fg"><label>Priority</label>
+      <select class="fc" id="ev-pri">
+        <option value="low">Low</option><option value="medium" selected>Medium</option>
+        <option value="high">High</option><option value="critical">🔴 Critical</option>
+      </select>
+    </div>
+    <!-- Auto-prep toggle — shows for job/event category -->
+    <div class="fg" id="prep-toggle-wrap" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:var(--rs);padding:12px">
+        <label class="toggle"><input type="checkbox" id="ev-autoprep" checked/><div class="ttrack"></div></label>
+        <div>
+          <div style="font-size:13px;font-weight:600">Auto-add Prep Block</div>
+          <div style="font-size:11px;color:var(--text2)">1-hour study/prep block before this event</div>
+        </div>
+      </div>
+    </div>
+    <!-- Variable shift timing — for jobs with flexible hours -->
+    <div class="fg" id="shift-toggle-wrap" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:var(--rs);padding:12px">
+        <label class="toggle"><input type="checkbox" id="ev-isshift"/><div class="ttrack"></div></label>
+        <div>
+          <div style="font-size:13px;font-weight:600">Variable Shift / Flexible Hours</div>
+          <div style="font-size:11px;color:var(--text2)">Time can change day-to-day (e.g., work shift)</div>
+        </div>
+      </div>
+    </div>
+    <div class="fg"><label>Notes</label><textarea class="fc" id="ev-notes" rows="2" placeholder="Details, location, links..."></textarea></div>
+    <input type="hidden" id="ev-eid"/>
+    <div class="macts">
+      <button class="btn bp" onclick="App.saveEvent()">Save</button>
+      <button class="btn bs" onclick="App.closeModal('modal-event')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD GOAL -->
+<div class="mbg" id="modal-goal" onclick="App.closeModal('modal-goal')">
+  <div class="mc" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <p class="mtitle">New Goal</p>
+    <div class="fg"><label>Title</label><input type="text" class="fc" id="goal-title" placeholder="What do you want to achieve?"/></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>Category</label>
+        <select class="fc" id="goal-cat">
+          <option value="study">Study</option><option value="career">Career</option>
+          <option value="health">Health</option><option value="personal">Personal</option>
+        </select>
+      </div>
+      <div class="fg"><label>Horizon</label>
+        <select class="fc" id="goal-hz">
+          <option value="weekly">Week</option><option value="monthly">Month</option>
+          <option value="yearly">Year</option><option value="lifetime">Lifetime</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Priority</label>
+      <select class="fc" id="goal-pri"><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option><option value="low">Low</option></select>
+    </div>
+    <div class="fg"><label>Notes</label><textarea class="fc" id="goal-notes" rows="2" placeholder="Details..."></textarea></div>
+    <div class="macts">
+      <button class="btn bp" onclick="App.saveGoal()">Save Goal</button>
+      <button class="btn bs" onclick="App.closeModal('modal-goal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD HABIT -->
+<div class="mbg" id="modal-habit" onclick="App.closeModal('modal-habit')">
+  <div class="mc" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <p class="mtitle">Add Habit</p>
+    <div class="fg"><label>Habit Name</label><input type="text" class="fc" id="h-name" placeholder="e.g. Morning walk"/></div>
+    <div class="fg"><label>Icon (emoji)</label><input type="text" class="fc" id="h-icon" placeholder="✅" maxlength="2"/></div>
+    <div class="macts">
+      <button class="btn bp" onclick="App.saveHabit()">Add Habit</button>
+      <button class="btn bs" onclick="App.closeModal('modal-habit')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: LOG URGE -->
+<div class="mbg" id="modal-urge" onclick="App.closeModal('modal-urge')">
+  <div class="mc" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <p class="mtitle">Log Urge</p>
+    <div class="fg"><label>Trigger</label>
+      <select class="fc" id="u-trigger">
+        <option value="stress">Stress</option><option value="boredom">Boredom</option>
+        <option value="social">Social</option><option value="habit">Habit/Routine</option><option value="other">Other</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Intensity: <span id="u-int-val" style="color:var(--accent);font-weight:700">6</span>/10</label>
+      <input type="range" min="1" max="10" value="6" id="u-int" style="width:100%"/>
+    </div>
+    <div class="fg"><label>Note</label><input type="text" class="fc" id="u-note" placeholder="Optional..."/></div>
+    <div class="fg" style="display:flex;align-items:center;gap:10px">
+      <label class="toggle"><input type="checkbox" id="u-resisted" checked/><div class="ttrack"></div></label>
+      <span style="font-size:14px">I resisted the urge</span>
+    </div>
+    <div class="macts">
+      <button class="btn bp" onclick="App.saveUrge()">Log Urge</button>
+      <button class="btn bs" onclick="App.closeModal('modal-urge')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: LOG ACTUAL COMPLETION TIME -->
+<div class="mbg" id="modal-complete-time" onclick="App.closeModal('modal-complete-time')">
+  <div class="mc" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <p class="mtitle" id="comp-title">Task Completion</p>
+    <div class="info-bar" style="margin-bottom:14px">⏱️ When did <strong id="comp-task-name">this</strong> actually finish?</div>
+    
+    <div class="fg">
+      <label>Planned End Time</label>
+      <div style="font-size:14px;font-weight:600;padding:10px;background:var(--bg3);border-radius:var(--rs);color:var(--text2)" id="comp-planned"></div>
+    </div>
+    
+    <div class="fg">
+      <label>Actual End Time</label>
+      <input type="time" class="fc" id="inp-comp-actual" style="font-size:22px;text-align:center;padding:14px"/>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:12px;text-align:center">
+        <div style="font-size:10px;color:var(--text2)">Time Difference</div>
+        <div style="font-size:18px;font-weight:700;color:var(--accent);margin-top:4px" id="comp-delta">--</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--rs);padding:12px;text-align:center">
+        <div style="font-size:10px;color:var(--text2)">Next Task Impact</div>
+        <div style="font-size:14px;font-weight:600;margin-top:4px" id="comp-impact">--</div>
+      </div>
+    </div>
+    
+    <div class="macts">
+      <button class="btn bp" onclick="App.completeTask()">Log Completion & Reschedule</button>
+      <button class="btn bs" onclick="App.closeModal('modal-complete-time')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TASK ADJUSTMENT PROMPT -->
+<div class="mbg" id="modal-task-adjust" onclick="App.closeModal('modal-task-adjust')">
+  <div class="mc" onclick="event.stopPropagation()">
+    <div class="mhandle"></div>
+    <p class="mtitle">⏰ Adjust Remaining Tasks?</p>
+    <div id="adjust-info" style="background:var(--bg3);border-radius:var(--rs);padding:12px;margin-bottom:14px;font-size:13px">
+      <div id="adjust-msg"></div>
+      <div id="adjust-task-info" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"></div>
+    </div>
+    
+    <div class="macts" style="flex-direction:column;gap:8px">
+      <button class="btn bp" style="width:100%" id="adjust-keep" onclick="App.adjustTask('keep')">✓ Keep as Planned</button>
+      <button class="btn bsm" style="width:100%;background:var(--warn);color:#000" id="adjust-compress" onclick="App.adjustTask('compress')">📉 Compress Time</button>
+      <button class="btn bsm" style="width:100%;background:var(--accent);color:#fff" id="adjust-skip" onclick="App.adjustTask('skip')">⏭️ Skip / Reschedule</button>
+    </div>
+    
+    <button class="btn bg" style="width:100%;margin-top:8px;font-size:12px" onclick="App.closeModal('modal-task-adjust')">Decide Later</button>
+  </div>
+</div>
+
+<div id="toast" class="out"></div>
+</div>
+
+<script>
+"use strict";
+
+// ── CONFIG ───────────────────────────────────────────────────
+const CFG = {
+  PRAYER:   [{s:480,e:540,label:'Morning Prayer'},{s:1080,e:1200,label:'Evening Prayer'}],
+  SLEEP_S:  1380, SLEEP_E: 360, REFLOW_MS: 150,
+  CAT_COL:  {prayer:'#F59E0B',study:'#3B82F6',meal:'#10B981',sleep:'#6366F1','sleep-prep':'#818CF8',exercise:'#EF4444',event:'#8B5CF6',other:'#6B7280'},
+  CAT_CLS:  {prayer:'cp',study:'cs',meal:'cm',sleep:'csl',exercise:'ce',event:'cev'},
+  CAT_ICO:  {study:'📚',meal:'🍽️',exercise:'🏋️',prayer:'🤲',sleep:'😴',event:'📅',other:'📌','sleep-prep':'😌'},
+};
+
+// ── DEFAULT DATA ──────────────────────────────────────────────
+const ACTS = [
+  {id:'a1',title:'Morning Prayer',  category:'prayer',    startTime:'08:00',endTime:'09:00',repeat:'daily',  isFixed:true, icon:'🤲',notes:'Fajr + Dhikr + Quran'},
+  {id:'a2',title:'Breakfast',        category:'meal',      startTime:'07:30',endTime:'08:00',repeat:'daily',  isFixed:false,icon:'🍳',notes:''},
+  {id:'a3',title:'Morning Study',    category:'study',     startTime:'09:30',endTime:'12:30',repeat:'weekdays',isFixed:false,icon:'📚',notes:'DSA or core skill'},
+  {id:'a4',title:'Lunch',            category:'meal',      startTime:'13:00',endTime:'13:30',repeat:'daily',  isFixed:false,icon:'🍱',notes:''},
+  {id:'a5',title:'Afternoon Study',  category:'study',     startTime:'14:00',endTime:'17:30',repeat:'weekdays',isFixed:false,icon:'💻',notes:'Project work'},
+  {id:'a6',title:'Evening Prayer',   category:'prayer',    startTime:'18:00',endTime:'20:00',repeat:'daily',  isFixed:true, icon:'🤲',notes:'Maghrib + Isha'},
+  {id:'a7',title:'Dinner',           category:'meal',      startTime:'20:15',endTime:'20:45',repeat:'daily',  isFixed:false,icon:'🍽️',notes:''},
+  {id:'a8',title:'Night Study',      category:'study',     startTime:'21:00',endTime:'22:30',repeat:'daily',  isFixed:false,icon:'🌙',notes:'Light review'},
+  {id:'a9',title:'Wind Down',        category:'sleep-prep',startTime:'22:30',endTime:'23:00',repeat:'daily',  isFixed:false,icon:'😌',notes:'No screens'},
+  {id:'a10',title:'Sleep',           category:'sleep',     startTime:'23:00',endTime:'06:00',repeat:'daily',  isFixed:true, icon:'😴',notes:'7h target'},
+];
+
+const DEF = {
+  habits:[
+    {id:'h1',name:'Morning Water 500ml',icon:'💧',streak:0,done:false},
+    {id:'h2',name:'Cloud Study 4.5 hrs', icon:'📚',streak:0,done:false},
+    {id:'h3',name:'Hash Recovery',       icon:'🍃',streak:0,done:false},
+    {id:'h4',name:'Sleep 11 hrs',        icon:'😴',streak:0,done:false},
+    {id:'h5',name:'Reading 30 min',      icon:'📖',streak:0,done:false},
+    {id:'h6',name:'Gym 45 min',          icon:'💪',streak:0,done:false},
+    {id:'h7',name:'Shiv Prayer 2x',      icon:'🤲',streak:0,done:false},
+  ],
+  goals:[
+    {id:'g1',title:'Linux File System & Permissions',category:'study',status:'todo',priority:'critical',horizon:'weekly',progress:0,notes:'Linux Journey - Foundation'},
+    {id:'g2',title:'Linux Users & Package Mgmt',category:'study',status:'todo',priority:'high',horizon:'weekly',progress:0,notes:'systemctl, apt, yum'},
+    {id:'g3',title:'Linux Shell Scripting',category:'study',status:'todo',priority:'high',horizon:'weekly',progress:0,notes:'Bash scripts, automation'},
+    {id:'g4',title:'Networking Basics - OSI Model',category:'study',status:'todo',priority:'critical',horizon:'weekly',progress:0,notes:'Cisco NetAcad Module 1-3'},
+    {id:'g5',title:'IP Addressing & Subnets',category:'study',status:'todo',priority:'critical',horizon:'weekly',progress:0,notes:'Subnet calculations'},
+    {id:'g6',title:'Git & GitHub Fundamentals',category:'study',status:'todo',priority:'critical',horizon:'weekly',progress:0,notes:'Commits, branches, PRs'},
+    {id:'g7',title:'AWS IAM & EC2 Basics',category:'study',status:'todo',priority:'critical',horizon:'weekly',progress:0,notes:'AWS Skill Builder'},
+    {id:'g8',title:'AWS S3 & CloudFront',category:'study',status:'todo',priority:'high',horizon:'weekly',progress:0,notes:'Static site hosting'},
+    {id:'g9',title:'Docker Fundamentals',category:'study',status:'todo',priority:'critical',horizon:'weekly',progress:0,notes:'Containers, images, compose'},
+    {id:'g10',title:'Terraform IaC Basics',category:'study',status:'todo',priority:'critical',horizon:'weekly',progress:0,notes:'Modules, state, providers'},
+    {id:'g11',title:'Kubernetes Pods & Deployments',category:'study',status:'todo',priority:'critical',horizon:'monthly',progress:0,notes:'K8s fundamentals'},
+    {id:'g12',title:'Prometheus & Grafana Setup',category:'study',status:'todo',priority:'high',horizon:'monthly',progress:0,notes:'Monitoring stack'},
+    {id:'g13',title:'Hash Joint Recovery - 30 Days',category:'health',status:'in-progress',priority:'critical',horizon:'monthly',progress:0,notes:'Day 1 start. Aggressive quit.'},
+    {id:'g14',title:'Sleep Schedule Shift to 6:30am',category:'health',status:'in-progress',priority:'high',horizon:'monthly',progress:0,notes:'11:30pm to 6:30am. Gradual.'},
+    {id:'g15',title:'Cisco Certification Track',category:'cert',status:'todo',priority:'high',horizon:'monthly',progress:0,notes:'Network Technician badge'},
+  ],
+  substances:{
+    cigarettes:{id:'cigarettes',label:'Cigarettes',icon:'🚬',unit:'cig',dailyLimit:0,todayCount:0,baseline:0,costPerUnit:15,streakDays:0,bestStreak:0,relapses:0,aggressiveQuit:false},
+    joints:    {id:'joints',    label:'Hash Joints',icon:'🍃',unit:'joint',dailyLimit:0,todayCount:0,baseline:2,costPerUnit:100,streakDays:0,bestStreak:0,relapses:0,aggressiveQuit:true},
+  },
+  skills:[
+    {name:'Linux Admin',weight:.12,level:0},{name:'Networking',weight:.08,level:0},
+    {name:'AWS Cloud',weight:.20,level:0},  {name:'Docker',weight:.08,level:0},
+    {name:'Terraform IaC',weight:.08,level:0},{name:'Kubernetes',weight:.08,level:0},
+    {name:'Git/GitHub',weight:.06,level:0}, {name:'Cloud Security',weight:.06,level:0},
+    {name:'Monitoring (Prom/Graf)',weight:.06,level:0},{name:'High Availability',weight:.04,level:0},
+    {name:'Certifications',weight:.04,level:0},{name:'Projects',weight:.08,level:0},
+    {name:'Interview Prep',weight:.02,level:0},
+  ],
+};
+
+// ── STATE ─────────────────────────────────────────────────────
+const S = {
+  page:'dashboard', date:todayStr(), schedTab:'all', horizon:'all',
+  sleepQ:3, _resetStep:0,
+  // user data
+  events:[], sleepLogs:[], urges:[],
+  habits: clone(DEF.habits), goals: clone(DEF.goals),
+  substances: clone(DEF.substances), skills: clone(DEF.skills),
+  // smart schedule state
+  wakeOverrides: {},   // {date: actualWakeMins}
+  carryover: [],       // [{id,title,category,durationMins,fromDate,targetDate,priority,notes,icon,goalId,chapter}]
+  cfg:{name:'',theme:'dark',accent:'#7C3AED',sleepTarget:7,studyTarget:6,scheduledWake:'06:00',scheduledBed:'23:00',notifEnabled:false,geminiKey:''},
+  // computed
+  schedule:[], energyCurve:[], conflicts:[],
+  notificationQueue:[], // {taskId, taskName, scheduledTime, sent:bool}
+  // Task completion tracking
+  completionTimes:{}, // {bid: actualEndMins}
+  currentCompletingTask:null, // {bid, actualEndMins, freedMins}
+  taskAdjustmentQueue:[], // [{bid,title,cat,action}]
+};
+
+/** Determine which prayers to conduct based on wake time */
+function getPrayerStatus(wakeM) {
+  const morningWindowEnd = toMins('09:00');   // 08:00-09:00
+  const eveningWindowStart = toMins('16:30'); // 1.5 hrs before 18:00
+  const eveningWindowTime = toMins('18:00');
+  
+  let status = {
+    morningPray: true,  // 08:00-09:00
+    eveningPray: true,  // 18:00-18:30
+    morningSkipped: false,
+    eveningSkipped: false
+  };
+  
+  // RULE 1: If wake > 09:00, skip morning, lock evening
+  if (wakeM > morningWindowEnd) {
+    status.morningPray = false;
+    status.morningSkipped = true;
+    status.eveningPray = false;
+    status.eveningSkipped = true;
+    return status;
+  }
+  
+  // RULE 2: If wake > 16:30 (1.5 hrs before 18:00), skip evening only
+  if (wakeM > eveningWindowStart && wakeM < eveningWindowTime) {
+    status.eveningPray = false;
+    status.eveningSkipped = true;
+    // Morning still ok (wake was before 09:00 to reach here)
+    return status;
+  }
+  
+  // RULE 3: Normal (before 16:30), both prayers conduct
+  return status;
+}
+
+/** Calculate sleep duration from sleep time to wake time */
+function calculateSleepDuration(sleepM, wakeM) {
+  if (sleepM === wakeM) return 0;
+  // If wake time is next day (smaller value), add 24 hours
+  if (wakeM < sleepM) {
+    return (1440 - sleepM + wakeM) / 60;
+  }
+  return (wakeM - sleepM) / 60;
+}
+
+/** Analyze sleep pattern from last 7 days */
+function analyzeSleepPattern() {
+  const logs = S.sleepLogs.slice(-7);
+  if (logs.length === 0) return null;
+  
+  const avgSleepM = logs.reduce((sum, log) => sum + toMins(log.sleepTime || '23:00'), 0) / logs.length;
+  const avgWakeM = logs.reduce((sum, log) => sum + toMins(log.wakeTime || '06:00'), 0) / logs.length;
+  
+  return {
+    avgSleepTime: avgSleepM,
+    avgWakeTime: avgWakeM,
+    avgSleepDuration: logs.reduce((sum, log) => sum + (log.dur || 0), 0) / logs.length
+  };
+}
+
+/** Generate sleep shift timeline to reach 23:30 sleep, 06:00 wake */
+function generateSleepShiftTimeline(currentWakeM) {
+  const targetSleepM = toMins('23:30');
+  const targetWakeM = toMins('06:00');
+  const shiftPerDay = 15; // 15 minutes per day
+  
+  const pattern = analyzeSleepPattern();
+  if (!pattern) return null;
+  
+  const currentSleepM = pattern.avgSleepTime;
+  const daysNeeded = Math.ceil(Math.abs(targetSleepM - currentSleepM) / shiftPerDay);
+  
+  const timeline = [];
+  for (let day = 1; day <= daysNeeded; day++) {
+    const newSleepM = currentSleepM + (shiftPerDay * day);
+    const newWakeM = currentWakeM + (shiftPerDay * day); // Wake also shifts
+    timeline.push({
+      day,
+      sleepTime: toTime(newSleepM % 1440),
+      wakeTime: toTime(newWakeM % 1440),
+      status: day === daysNeeded ? 'Target Reached ✓' : 'In Progress'
+    });
+    if (day >= 30) break; // Cap at 30 days
+  }
+  
+  return timeline;
+}
+
+/** Save sleep data to localStorage and S.sleepLogs */
+function saveSleepData(sleepTime, wakeTime) {
+  const date = todayStr();
+  const sleepM = toMins(sleepTime);
+  const wakeM = toMins(wakeTime);
+  const duration = calculateSleepDuration(sleepM, wakeM);
+  
+  // Create/update sleep log entry
+  const existingLog = S.sleepLogs.find(l => l.date === date);
+  const logEntry = {
+    date,
+    bedtime: sleepTime,
+    wakeTime: wakeTime,
+    sleepTime: sleepTime,
+    quality: existingLog?.quality || 5,
+    dur: duration,
+    notes: existingLog?.notes || ''
+  };
+  
+  if (existingLog) {
+    Object.assign(existingLog, logEntry);
+  } else {
+    S.sleepLogs.push(logEntry);
+  }
+  
+  // Save to localStorage
+  localStorage.setItem(`sleep_${date}`, JSON.stringify(logEntry));
+  
+  // Update S.wakeOverrides for schedule
+  S.wakeOverrides[date] = wakeM;
+  localStorage.setItem(`wake_${date}`, wakeM.toString());
+  
+  return logEntry;
+}
+
+/** Load sleep data from localStorage or input */
+function loadSleepData() {
+  const sleepTimeInput = qs('#inp-sleep-time').value;
+  const wakeTimeInput = qs('#inp-wake-time').value;
+  
+  if (!sleepTimeInput || !wakeTimeInput) {
+    toast('Please enter both sleep and wake times', 'warning');
+    return;
+  }
+  
+  // Save to storage
+  const log = saveSleepData(sleepTimeInput, wakeTimeInput);
+  
+  // Update prayer status display
+  const wakeM = toMins(wakeTimeInput);
+  const prayerStatus = getPrayerStatus(wakeM);
+  updatePrayerStatusDisplay(prayerStatus, wakeM);
+  
+  // Check if sleep shift needed (wake > 12:00 PM)
+  if (wakeM > toMins('12:00')) {
+    const timeline = generateSleepShiftTimeline(wakeM);
+    if (timeline) {
+      toast(`📊 Sleep shift timeline: ${timeline.length} days to target`, 'info', 4000);
+      // TODO: Display timeline in UI
+    }
+  }
+  
+  // Rebuild schedule with new times
+  S.date = todayStr();
+  reflow();
+  toast('✅ Sleep & wake times loaded. Schedule updated!', 'success', 3000);
+}
+
+/** Update prayer status display */
+function updatePrayerStatusDisplay(prayerStatus, wakeM) {
+  const statusEl = qs('#prayer-status');
+  if (!statusEl) return;
+  
+  let status = '';
+  if (prayerStatus.morningSkipped && prayerStatus.eveningSkipped) {
+    status = '🔴 Both Skipped';
+  } else if (prayerStatus.morningSkipped) {
+    status = '🟡 Evening Only';
+  } else if (prayerStatus.eveningSkipped) {
+    status = '🟡 Morning Only';
+  } else {
+    status = '🟢 Both Conduct';
+  }
+  
+  statusEl.textContent = status;
+}
+
+/** Update sleep duration display in real-time */
+function updateSleepDurationDisplay() {
+  const sleepTimeInput = qs('#inp-sleep-time').value;
+  const wakeTimeInput = qs('#inp-wake-time').value;
+  const durationEl = qs('#sleep-duration');
+  
+  if (!sleepTimeInput || !wakeTimeInput || !durationEl) return;
+  
+  const sleepM = toMins(sleepTimeInput);
+  const wakeM = toMins(wakeTimeInput);
+  const duration = calculateSleepDuration(sleepM, wakeM);
+  
+  durationEl.textContent = duration.toFixed(1) + ' h';
+  
+  // Also update prayer status in real-time
+  const prayerStatus = getPrayerStatus(wakeM);
+  updatePrayerStatusDisplay(prayerStatus, wakeM);
+}
+
+/** Get icon for category */
+function getCategoryIcon(category) {
+  const icons = {
+    study: '📚',
+    prayer: '🤲',
+    spiritual: '🤲',
+    meal: '🍽️',
+    nutrition: '🍽️',
+    breakfast: '🥗',
+    lunch: '🍛',
+    dinner: '🍲',
+    exercise: '💪',
+    fitness: '💪',
+    gym: '💪',
+    health: '💊',
+    sleep: '😴',
+    reading: '📖',
+    other: '☕',
+    'me-time': '☕'
+  };
+  return icons[category] || '📌';
+}
+
+// ── SMART SCHEDULING HELPERS ──────────────────────────────────
+
+
+/** Calculate meal times based on wake time */
+function calculateMealTimes(wakeM) {
+  const breakfastM = wakeM + 90;    // Wake + 90 min
+  const lunchM = breakfastM + 210;  // Breakfast + 3.5 hrs (210 min)
+  const dinnerM = toMins('20:00');  // Fixed 20:00
+  
+  return {
+    breakfast: {sm: breakfastM, em: breakfastM + 30, label: 'Breakfast'},
+    lunch: {sm: lunchM, em: lunchM + 30, label: 'Lunch'},
+    dinner: {sm: dinnerM, em: dinnerM + 30, label: 'Dinner'}
+  };
+}
+
+/** Check if morning prayer was done (completed status in schedule) */
+function isMorningPrayerDone(blocks) {
+  const morningPrayer = blocks.find(b => b.category === 'prayer' && b.sm === 480 && b.em === 540);
+  return morningPrayer && morningPrayer.status === 'completed';
+}
+
+/** Calculate gym time based on prayer status */
+function getGymTime(blocks) {
+  const morningDone = isMorningPrayerDone(blocks);
+  if (morningDone) return {sm: 1110, em: 1170, label: 'Gym - Recovery'}; // 18:30-19:15
+  // If missed: try 19:00 or 21:00 based on available slots
+  return {sm: 1140, em: 1200, label: 'Gym - Evening'};                    // 19:00-20:00
+}
+
+/** Get study goals in sequential order (critical first, then high) */
+function getSequentialStudyGoals() {
+  const studyGoals = S.goals.filter(g => g.category === 'study' && g.status !== 'completed');
+  return studyGoals.sort((a, b) => {
+    const priOrder = {critical: 0, high: 1, medium: 2, low: 3};
+    return (priOrder[a.priority] || 3) - (priOrder[b.priority] || 3);
+  });
+}
+
+/** Fill remaining time with study blocks from roadmap */
+function generateStudyBlocks(startM, endM, studyGoals, buffer) {
+  const blocks = [];
+  let currentM = startM;
+  
+  for (const goal of studyGoals) {
+    if (currentM >= endM) break;
+    
+    // Estimate 2-3 hours per study goal
+    const studyDur = Math.min(180, endM - currentM - buffer);
+    if (studyDur < 30) continue;
+    
+    blocks.push({
+      title: goal.title,
+      category: 'study',
+      sm: currentM,
+      em: currentM + studyDur,
+      icon: '📚',
+      notes: goal.notes,
+      goalId: goal.id,
+      locked: false,
+      isGenerated: true
+    });
+    
+    currentM += studyDur + buffer; // Add buffer between blocks
+  }
+  
+  return blocks;
+}
+
+/** Calculate sleep debt and insert naps if needed */
+function calculateSleepDebt() {
+  const logs = S.sleepLogs.slice(-7);
+  if (!logs.length) return 0;
+  const avgSleep = logs.reduce((sum, l) => sum + l.dur, 0) / logs.length;
+  return Math.max(0, (S.cfg.sleepTarget || 7) - avgSleep);
+}
+
+/** Get month number for buffer calculation (M1, M2, M3+) */
+function getCurrentMonth() {
+  // Assume 30-day months from start date in S.cfg
+  const startDate = new Date('2025-06-01');
+  const today = new Date();
+  const months = Math.floor((today - startDate) / (30 * 24 * 60 * 60 * 1000)) + 1;
+  return Math.max(1, Math.min(months, 3));
+}
+
+/** Get buffer time in minutes based on current month */
+function getBuffer() {
+  const month = getCurrentMonth();
+  const buffers = {1: 10, 2: 8};
+  return buffers[month] || 7;
+}
+
+/** Check for prayer conflicts and validate */
+function validatePrayerConflicts(blocks) {
+  const morningPrayer = blocks.find(b => b.category === 'prayer' && b.title.includes('Morning'));
+  const conflicts = [];
+  
+  if (morningPrayer) {
+    blocks.forEach(b => {
+      if (b.category !== 'prayer' && overlaps(b.sm, b.em, 470, 550)) { // 07:50-09:10
+        conflicts.push({title: b.title, reason: 'Overlaps morning prayer bath time'});
+      }
+    });
+  }
+  
+  return conflicts;
+}
+
+/** Calculate total vs available time */
+function checkTimeOverflow(blocks, wakeM, sleepM) {
+  const totalNeeded = blocks.reduce((sum, b) => sum + (b.em - b.sm), 0);
+  const available = (sleepM >= wakeM) ? (sleepM - wakeM) : (1440 - wakeM + sleepM);
+  return {totalNeeded, available, overflow: totalNeeded > available};
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────
+
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function toMins(t){if(!t)return 0;const[h,m]=(t+'').split(':').map(Number);return h*60+m}
+function toTime(m){const s=((m%1440)+1440)%1440;return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+function fmtDur(m){const h=Math.floor(Math.abs(m)/60),mm=Math.abs(m)%60;return h?`${h}h${mm?` ${mm}m`:''}`:mm+'m'}
+function clamp(v,a,b){return Math.min(Math.max(v,a),b)}
+function uid(p){return`${p||'x'}-${Date.now()}-${Math.random().toString(36).slice(2,5)}`}
+function cc(cat){return CFG.CAT_COL[cat]||'#6B7280'}
+function overlaps(sa,ea,sb,eb){return sa<eb&&ea>sb}
+function isWD(d){const day=new Date(d+'T00:00:00').getDay();return day>0&&day<6}
+function fmtDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}
+function shortDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
+function addDays(d,n){const dt=new Date(d+'T00:00:00');dt.setDate(dt.getDate()+n);return dt.toISOString().slice(0,10)}
+function greet(){const h=new Date().getHours(),n=S.cfg.name?`, ${S.cfg.name}`:'';return h<12?`Good Morning${n} 👋`:h<17?`Good Afternoon${n} ☀️`:`Good Evening${n} 🌙`}
+function toast(msg,type,ms){
+  const t=document.getElementById('toast');
+  const cols={info:'var(--accent)',success:'var(--success)',warning:'var(--warn)',error:'var(--danger)'};
+  t.textContent=msg; t.style.borderLeftColor=cols[type]||cols.info;
+  t.classList.remove('out'); clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.add('out'),ms||2800);
+}
+function qs(s,c){return(c||document).querySelector(s)}
+function html(el,str){if(el)el.innerHTML=str}
+function txt(el,str){if(el)el.textContent=str}
+
+// ── ENGINE ────────────────────────────────────────────────────
+
+/** Apply wake-late shift: push all non-locked blocks by delta minutes */
+function applyWakeShift(blocks, scheduledWakeMins, delta) {
+  if(delta<=0) return blocks;
+  return blocks.map(b=>{
+    if(b.locked||b.category==='prayer'||b.category==='sleep') return b;
+    if(b.sm < scheduledWakeMins) return b; // before scheduled wake, don't touch
+    const newSm=b.sm+delta, newEm=b.em+delta;
+    return{...b,sm:newSm,em:newEm,startTime:toTime(newSm),endTime:toTime(newEm),
+      lateShifted:true,overflow:newEm>CFG.SLEEP_S};
+  });
+}
+
+/** Find free time slots in a schedule */
+function findFreeSlots(blocks, minDur, from, until) {
+  minDur=minDur||20; from=from||360; until=until||CFG.SLEEP_S;
+  const sorted=blocks.filter(b=>b.sm<until&&b.em>from).sort((a,b)=>a.sm-b.sm);
+  const slots=[];
+  let cur=from;
+  for(const b of sorted){
+    const start=Math.max(b.sm,from);
+    if(start-cur>=minDur) slots.push({start:cur,end:start,dur:start-cur});
+    cur=Math.max(cur,b.em);
+  }
+  if(until-cur>=minDur) slots.push({start:cur,end:until,dur:until-cur});
+  return slots;
+}
+
+/** Inject carryover tasks into free slots */
+function injectCarryover(blocks, tasks) {
+  const slots=findFreeSlots(blocks,20);
+  const injected=[];
+  // Sort: sequential/critical first, then high, then rest
+  const sorted=[...tasks].sort((a,b)=>{
+    const seq=(b.isSequential?1:0)-(a.isSequential?1:0);
+    if(seq!==0) return seq;
+    const pri={critical:0,high:1,medium:2,low:3};
+    return (pri[a.priority]||2)-(pri[b.priority]||2);
+  });
+  for(const task of sorted){
+    const dur=Math.min(task.durationMins,90);
+    const slot=slots.find(s=>s.dur>=dur);
+    if(slot){
+      injected.push({...task,bid:uid('co'),sm:slot.start,em:slot.start+dur,
+        startTime:toTime(slot.start),endTime:toTime(slot.start+dur),
+        isCarryover:true,src:'carryover',locked:false,status:'pending'});
+      slot.start+=dur+5; slot.dur=slot.end-slot.start;
+    }
+    // If no slot, task stays in S.carryover and is shown in missed panel
+  }
+  return [...blocks,...injected];
+}
+
+/** Main schedule builder */
+function buildSchedule(){
+  const wdFiltered=ACTS.filter(a=>a.repeat==='daily'||(a.repeat==='weekdays'&&isWD(S.date)));
+  
+  // Get current wake time (from input or default)
+  const wakeM = S.wakeOverrides[S.date] || toMins(S.cfg.scheduledWake || '06:00');
+  const buffer = getBuffer();
+  
+  // ========== PRAYER LOGIC BASED ON WAKE TIME ==========
+  const prayerStatus = getPrayerStatus(wakeM);
+  
+  // STEP 1-4: CALCULATE MEAL TIMES
+  const meals = calculateMealTimes(wakeM);
+  
+  // Base activity blocks - EXCLUDE study blocks (we'll generate them)
+  let blocks = wdFiltered
+    .filter(a => {
+      // Skip study blocks (generated dynamically)
+      if (a.category === 'study') return false;
+      
+      // SKIP MORNING PRAYER if wake > 09:00
+      if (a.title.includes('Morning') && a.category === 'prayer' && !prayerStatus.morningPray) return false;
+      
+      // SKIP EVENING PRAYER if conditions met
+      if (a.title.includes('Evening') && a.category === 'prayer' && !prayerStatus.eveningPray) return false;
+      
+      return true;
+    })
+    .map(a => {
+      // Replace breakfast/lunch times with calculated times
+      let block = {...clone(a), bid: uid('a'), src: 'act',
+        sm: toMins(a.startTime), em: toMins(a.endTime), 
+        status: 'pending', locked: a.isFixed || a.category === 'prayer'};
+      
+      if (a.id === 'a2') { // Breakfast
+        block.sm = meals.breakfast.sm;
+        block.em = meals.breakfast.em;
+        block.startTime = toTime(block.sm);
+        block.endTime = toTime(block.em);
+      } else if (a.id === 'a4') { // Lunch
+        block.sm = meals.lunch.sm;
+        block.em = meals.lunch.em;
+        block.startTime = toTime(block.sm);
+        block.endTime = toTime(block.em);
+      } else if (a.id === 'a7') { // Dinner
+        block.sm = meals.dinner.sm;
+        block.em = meals.dinner.em;
+        block.startTime = toTime(block.sm);
+        block.endTime = toTime(block.em);
+      }
+      
+      return block;
+    });
+  
+  // STEP 5-6: ADD PRAYERS ONLY IF NEEDED (based on prayerStatus)
+  if (prayerStatus.morningPray) {
+    const morningExists = blocks.find(b => b.category === 'prayer' && b.title.includes('Morning'));
+    if (!morningExists) {
+      blocks.push({
+        bid: uid('a'), title: 'Morning Prayer', category: 'prayer',
+        sm: 480, em: 540, startTime: '08:00', endTime: '09:00',
+        status: 'pending', locked: true, icon: '🤲', isGenerated: true
+      });
+    }
+  }
+  
+  if (prayerStatus.eveningPray) {
+    const eveningExists = blocks.find(b => b.category === 'prayer' && b.title.includes('Evening'));
+    if (!eveningExists) {
+      blocks.push({
+        bid: uid('a'), title: 'Evening Prayer', category: 'prayer',
+        sm: 1080, em: 1110, startTime: '18:00', endTime: '18:30',
+        status: 'pending', locked: true, icon: '🤲', isGenerated: true
+      });
+    }
+  }
+  
+  // STEP 7: AUTO-SCHEDULE GYM based on prayer status
+  const existingGym = blocks.find(b => b.category === 'exercise');
+  if (!existingGym) {
+    let gymTime;
+    
+    if (prayerStatus.morningPray && prayerStatus.eveningPray) {
+      // Both prayers: gym at 18:30 if morning done
+      gymTime = {sm: 1110, em: 1170, label: 'Gym - After Prayers'};
+    } else if (!prayerStatus.morningPray && !prayerStatus.eveningPray) {
+      // No prayers: gym at 19:00
+      gymTime = {sm: 1140, em: 1200, label: 'Gym - Evening'};
+    } else {
+      // One prayer: gym at 19:00
+      gymTime = {sm: 1140, em: 1200, label: 'Gym - Evening'};
+    }
+    
+    blocks.push({
+      bid: uid('a'), title: gymTime.label, category: 'exercise',
+      sm: gymTime.sm, em: gymTime.em, 
+      startTime: toTime(gymTime.sm), endTime: toTime(gymTime.em),
+      status: 'pending', locked: false, icon: '💪', isGenerated: true
+    });
+  }
+  
+  // User events for this date
+  S.events.filter(e=>e.date===S.date&&e.status!=='cancelled')
+    .forEach(e=>blocks.push({...clone(e),bid:uid('e'),src:'evt',
+      sm:toMins(e.startTime),em:toMins(e.endTime),
+      status:e.status||'pending',locked:e.category==='prayer'||e.priority==='critical'}));
+  
+  // STEP 8: CALCULATE SLEEP DEBT and handle naps
+  const sleepDebt = calculateSleepDebt();
+  // Naps would be inserted here if needed (user confirmation required)
+  
+  // ① Apply wake-late shift
+  const wakeOv=S.wakeOverrides[S.date];
+  const scheduledWakeMins=toMins(S.cfg.scheduledWake||'06:00');
+  if(wakeOv&&wakeOv>scheduledWakeMins){
+    blocks=applyWakeShift(blocks,scheduledWakeMins,wakeOv-scheduledWakeMins);
+  }
+  
+  // STEP 9: CUSTOM BLOCKS VALIDATION (no prayer conflicts)
+  const prayerConflicts = validatePrayerConflicts(blocks);
+  if (prayerConflicts.length > 0) {
+    S.conflicts = [...S.conflicts, ...prayerConflicts];
+  }
+  
+  // ② Prayer hard-lock: move overlapping blocks after prayer window
+  blocks=blocks.map(b=>{
+    if(b.locked||b.category==='prayer')return b;
+    for(const pw of CFG.PRAYER){
+      if(overlaps(b.sm,b.em,pw.s,pw.e)){
+        const dur=b.em-b.sm;
+        b.sm=pw.e+5; b.em=b.sm+dur;
+        b.startTime=toTime(b.sm); b.endTime=toTime(b.em);
+        b.moved=true;
+      }
+    }
+    return b;
+  });
+  
+  // ③ Resolve overlaps
+  const sorted=[...blocks].sort((a,b)=>a.sm-b.sm);
+  const placed=[];
+  S.conflicts=[];
+  for(const cur of sorted){
+    const blocker=placed.find(p=>overlaps(cur.sm,cur.em,p.sm,p.em)&&p.em>cur.sm);
+    if(!blocker){placed.push(cur);continue;}
+    if(cur.locked){
+      S.conflicts.push({title:cur.title,severity:'hard'});
+      placed.push(cur);
+    } else {
+      const dur=cur.em-cur.sm;
+      cur.sm=blocker.em+buffer; cur.em=cur.sm+dur;
+      cur.startTime=toTime(cur.sm); cur.endTime=toTime(cur.em);
+      cur.moved=true;
+      S.conflicts.push({title:cur.title,severity:'soft',newStart:cur.startTime});
+      placed.push(cur);
+      placed.sort((a,b)=>a.sm-b.sm);
+    }
+  }
+  
+  // STEP 10: GENERATE STUDY BLOCKS from roadmap sequence
+  const studyGoals = getSequentialStudyGoals();
+  // Find available slots for study
+  const sleepM = toMins(S.cfg.scheduledBed || '23:00');
+  const freeSlots = findFreeSlots(placed, 30, wakeM, sleepM);
+  
+  let studyBlocksAdded = 0;
+  for (const slot of freeSlots) {
+    if (studyBlocksAdded >= studyGoals.length) break;
+    const goal = studyGoals[studyBlocksAdded];
+    const studyDur = Math.min(180, slot.dur - buffer);
+    if (studyDur < 30) continue;
+    
+    placed.push({
+      bid: uid('s'), title: goal.title, category: 'study',
+      sm: slot.start, em: slot.start + studyDur,
+      startTime: toTime(slot.start), endTime: toTime(slot.start + studyDur),
+      status: 'pending', locked: false, icon: '📚',
+      goalId: goal.id, isGenerated: true
+    });
+    placed.sort((a,b)=>a.sm-b.sm);
+    studyBlocksAdded++;
+  }
+  
+  // STEP 11: Insert me-time / gardening in freed ≥30 min slots
+  const allSlots = findFreeSlots(placed, 30, wakeM, sleepM);
+  let meTimeAdded = 0;
+  for (const slot of allSlots) {
+    if (slot.dur >= 30 && meTimeAdded < 1) { // Add max 1 me-time block
+      placed.push({
+        bid: uid('m'), title: '☕ Me-Time / Break', category: 'other',
+        sm: slot.start, em: slot.start + Math.min(60, slot.dur),
+        startTime: toTime(slot.start), endTime: toTime(slot.start + Math.min(60, slot.dur)),
+        status: 'pending', locked: false, icon: '☕', isGenerated: true
+      });
+      placed.sort((a,b)=>a.sm-b.sm);
+      meTimeAdded++;
+    }
+  }
+  
+  // STEP 12: BUFFER already applied in overlap resolution (line above)
+  // ④ Inject carryover tasks into free slots
+  const todayCO=S.carryover.filter(t=>t.targetDate===S.date&&!t.placed);
+  const withCO=todayCO.length?injectCarryover(placed,todayCO):placed;
+  // Mark successfully placed carryovers
+  withCO.filter(b=>b.isCarryover).forEach(b=>{
+    const co=S.carryover.find(c=>c.id===b.id||c.title===b.title);
+    if(co) co.placed=true;
+  });
+  
+  // STEP 13: CHECK TIME OVERFLOW
+  const overflow = checkTimeOverflow(withCO, wakeM, sleepM);
+  if (overflow.overflow) {
+    toast(`⚠️ Schedule overflow: ${fmtDur(overflow.totalNeeded)} needed vs ${fmtDur(overflow.available)} available`, 'warning', 4000);
+  }
+  
+  // STEP 14: NOTIFICATIONS - already handled by startNotificationEngine()
+  
+  return withCO.sort((a,b)=>a.sm-b.sm);
+}
+
+function buildEnergy(){
+  const last=S.sleepLogs[S.sleepLogs.length-1];
+  const dur=last?last.dur:7,q=last?last.quality:3;
+  const wakeH=last?Math.floor(toMins(last.wakeTime)/60):6;
+  const qm=0.6+(q/5)*0.4,debt=Math.max(0,(S.cfg.sleepTarget-dur)*5);
+  const base=[20,15,10,10,12,20,40,60,75,85,90,88,82,70,62,68,78,85,88,80,70,60,45,30];
+  return Array.from({length:24},(_,i)=>({hour:(wakeH+i)%24,e:clamp(Math.round(base[(wakeH+i)%24]*qm-debt),0,100)}));
+}
+
+function sleepStats(){
+  const logs=S.sleepLogs.slice(-7);
+  if(!logs.length)return{avg:null,best:null,debt:null};
+  const durs=logs.map(l=>l.dur);
+  const avg=+(durs.reduce((a,b)=>a+b,0)/durs.length).toFixed(1);
+  return{avg,best:Math.max(...durs),debt:+(S.cfg.sleepTarget-avg).toFixed(1)};
+}
+
+function readiness(){
+  return Math.round(S.skills.reduce((sum,sk)=>sum+(clamp(sk.level,0,100)/100)*sk.weight*100,0));
+}
+
+function dayProgress(){
+  return S.habits.length?Math.round(S.habits.filter(h=>h.done).length/S.habits.length*100):0;
+}
+
+/** Get upcoming future events (next 7 days, excluding today) */
+function getFutureEvents(){
+  const today=todayStr();
+  return S.events
+    .filter(e=>e.date>today&&e.status!=='cancelled')
+    .sort((a,b)=>a.date.localeCompare(b.date)||toMins(a.startTime)-toMins(b.startTime))
+    .slice(0,6);
+}
+
+/** Get missed tasks for today */
+function getMissedTasks(){
+  const nowM=new Date().getHours()*60+new Date().getMinutes();
+  if(S.date!==todayStr()) return [];
+  return S.schedule.filter(b=>
+    !b.locked&&b.status!=='completed'&&
+    !['sleep','sleep-prep'].includes(b.category)&&
+    b.em<nowM&&!b.isCarryover
+  );
+}
+
+// ── REFLOW ────────────────────────────────────────────────────
+let _rfT=null,_rfBusy=false;
+function reflow(){
+  clearTimeout(_rfT);
+  _rfT=setTimeout(()=>{
+    if(_rfBusy){reflow();return;}
+    _rfBusy=true;
+    try{S.schedule=buildSchedule();S.energyCurve=buildEnergy();render();}
+    catch(e){console.error('[LifeOS]',e);}
+    finally{_rfBusy=false;}
+  },CFG.REFLOW_MS);
+}
+
+// ── RENDER DISPATCHER ─────────────────────────────────────────
+function render(){
+  txt(qs('#hdr-date'),new Date(S.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}));
+  ({dashboard:renderDash,scheduler:renderSched,sleep:renderSleep,roadmap:renderRoad,addiction:renderAddict,settings:renderSettings}[S.page]||renderDash)();
+}
+
+// ── RENDER: DASHBOARD ─────────────────────────────────────────
+function renderDash(){
+  txt(qs('#greeting'),greet());
+  txt(qs('#greeting-sub'),fmtDate(S.date));
+
+  // Late wake banner
+  const nowM=new Date().getHours()*60+new Date().getMinutes();
+  const schedWakeM=toMins(S.cfg.scheduledWake||'06:00');
+  const lbEl=qs('#late-banner');
+  const wakeOv=S.wakeOverrides[S.date];
+  if(S.date===todayStr()&&nowM>schedWakeM+30&&!wakeOv){
+    lbEl.style.display='block';
+    lbEl.innerHTML=`⏰ You woke up later than scheduled? <button class="btn bsm" style="background:rgba(255,255,255,.1);color:var(--warn);margin-left:8px;min-height:30px" onclick="App.nav('scheduler')">Adjust Schedule →</button>`;
+  } else lbEl.style.display='none';
+
+  // Summary cards
+  const last=S.sleepLogs[S.sleepLogs.length-1];
+  const studyH=+(S.schedule.filter(b=>b.category==='study'&&b.status==='completed').reduce((a,b)=>a+(b.em-b.sm)/60,0)).toFixed(1);
+  const meals=S.schedule.filter(b=>b.category==='meal'&&b.status==='completed').length;
+  const gym=S.schedule.some(b=>b.category==='exercise'&&b.status==='completed');
+  html(qs('#sum-row'),`
+    <div class="sc"><div class="si">😴</div><span class="sl">Sleep</span><span class="sv">${last?last.dur+'h':'--'}</span></div>
+    <div class="sc"><div class="si">📚</div><span class="sl">Study</span><span class="sv">${studyH}h</span></div>
+    <div class="sc"><div class="si">🍽️</div><span class="sl">Meals</span><span class="sv">${meals}/3</span></div>
+    <div class="sc"><div class="si">🏋️</div><span class="sl">Gym</span><span class="sv">${gym?'✓':'–'}</span></div>`);
+
+  // Ring
+  const pct=dayProgress(),r=48,circ=+(2*Math.PI*r).toFixed(1),off=+(circ-(pct/100)*circ).toFixed(1);
+  html(qs('#ring-svg'),`<circle cx="55" cy="55" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="10"/>
+    <circle cx="55" cy="55" r="${r}" fill="none" stroke="${S.cfg.accent}" stroke-width="10"
+      stroke-dasharray="${circ}" stroke-dashoffset="${off}" stroke-linecap="round" transform="rotate(-90 55 55)"
+      style="transition:stroke-dashoffset .6s ease"/>`);
+  txt(qs('#ring-pct'),pct+'%');
+
+  // Bars
+  const slPct=last?clamp((last.dur/S.cfg.sleepTarget)*100,0,100):0;
+  const stPct=clamp((studyH/S.cfg.studyTarget)*100,0,100);
+  html(qs('#dash-bars'),`
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>😴 Sleep</span><span style="color:var(--text2)">${last?last.dur:'0'}/${S.cfg.sleepTarget}h</span></div>
+      <div class="bwrap" style="height:6px"><div class="bfill" style="width:${slPct}%;background:var(--sleep)"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>📚 Study</span><span style="color:var(--text2)">${studyH}/${S.cfg.studyTarget}h</span></div>
+      <div class="bwrap" style="height:6px"><div class="bfill" style="width:${stPct}%;background:var(--study)"></div></div>
+    </div>`);
+
+  html(qs('#echart'),S.energyCurve.filter((_,i)=>i%2===0).map(pt=>
+    `<div class="eb" style="height:${pt.e}%;background:${pt.e>=80?'var(--success)':pt.e>=60?'var(--study)':pt.e>=40?'var(--warn)':'var(--danger)'}" title="${toTime(pt.hour*60)}: ${pt.e}%"></div>`
+  ).join(''));
+
+  // Upcoming future events
+  const futEvts=getFutureEvents();
+  const ucCard=qs('#upcoming-card');
+  if(futEvts.length){
+    ucCard.style.display='block';
+    html(qs('#upcoming-strip'),futEvts.map(e=>{
+      const daysUntil=Math.ceil((new Date(e.date+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/(86400000));
+      return`<div class="upcoming-card">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:3px">${daysUntil===1?'Tomorrow':daysUntil+'d away'} · ${shortDate(e.date)}</div>
+        <div style="font-size:13px;font-weight:700">${e.icon||'📅'} ${e.title}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${e.startTime}${e.notes?` · ${e.notes.slice(0,20)}`:''}</div>
+      </div>`;
+    }).join(''));
+  } else ucCard.style.display='none';
+
+  // Habits
+  html(qs('#habit-list'),S.habits.map(h=>`
+    <div class="hc ${h.done?'done':''}" style="border-color:${h.done?'var(--success)':'var(--border)'}">
+      <span style="font-size:20px">${h.icon}</span>
+      <div class="hi"><div class="hn">${h.name}</div><div class="hs">🔥 ${h.streak} day streak</div></div>
+      <button class="hbtn ${h.done?'done':''}" onclick="App.toggleHabit('${h.id}')">${h.done?'✓':'○'}</button>
+    </div>`).join('')||'<div class="empty">No habits yet!</div>');
+
+  // Today's upcoming blocks
+  const up=S.schedule.filter(b=>b.sm>nowM&&b.status!=='completed').slice(0,4);
+  html(qs('#dash-rems'),up.length?up.map(b=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--text2);width:38px;flex-shrink:0">${b.startTime}</span>
+      <span style="width:8px;height:8px;border-radius:50%;background:${cc(b.category)};flex-shrink:0"></span>
+      <span style="font-size:14px;flex:1">${b.icon||'📌'} ${b.title}</span>
+      ${b.isCarryover?'<span class="pill pill-warn">↩</span>':''}
+    </div>`).join(''):'<div class="empty">All clear for today! 🎉</div>');
+}
+
+// ── RENDER: SCHEDULER ─────────────────────────────────────────
+function renderSched(){
+  txt(qs('#sched-date'),shortDate(S.date));
+  const isToday=S.date===todayStr();
+  const nowM=new Date().getHours()*60+new Date().getMinutes();
+  const wakeOv=S.wakeOverrides[S.date];
+  const schedWakeM=toMins(S.cfg.scheduledWake||'06:00');
+
+  // Sleep input panel (today only)
+  const sp=qs('#sleep-input-panel');
+  if(isToday){
+    sp.style.display='block';
+    // Set current time as default for wake time
+    qs('#inp-wake-time').value = wakeOv ? toTime(wakeOv) : toTime(nowM);
+    // Add event listeners for real-time updates
+    qs('#inp-sleep-time').addEventListener('change', updateSleepDurationDisplay);
+    qs('#inp-wake-time').addEventListener('change', updateSleepDurationDisplay);
+    updateSleepDurationDisplay(); // Initial calculation
+  } else sp.style.display='none';
+
+  // Wake panel (today only)
+  const wp=qs('#wake-panel');
+  if(isToday){
+    wp.style.display='block';
+    txt(qs('#wake-sched'),S.cfg.scheduledWake||'06:00');
+    txt(qs('#wake-actual'),wakeOv?toTime(wakeOv):'--');
+    qs('#wake-actual').style.color=wakeOv&&wakeOv>schedWakeM?'var(--danger)':'var(--text2)';
+    const delta=wakeOv?wakeOv-schedWakeM:0;
+    const shifted=S.schedule.filter(b=>b.lateShifted).length;
+    txt(qs('#wake-delta'), wakeOv&&delta>0
+      ? `⏰ ${fmtDur(delta)} late — ${shifted} block${shifted!==1?'s':''} shifted forward`
+      : isToday&&nowM>schedWakeM+30&&!wakeOv
+        ? '⚠️ Woke up late? Tap "Log Wake" to auto-rebuild your schedule.'
+        : '✅ Schedule based on planned wake time.');
+    // Preload input with current time or override
+    const inp=qs('#inp-wake-actual');
+    if(!inp.dataset.touched) inp.value=wakeOv?toTime(wakeOv):toTime(nowM);
+  } else wp.style.display='none';
+
+  // Carryover panel
+  const todayCO=S.carryover.filter(t=>t.targetDate===S.date);
+  const cop=qs('#co-panel');
+  if(todayCO.length){
+    cop.style.display='block';
+    html(qs('#co-list'),todayCO.map(t=>`
+      <div class="co-item">
+        <span style="font-size:18px">${t.icon||'↩️'}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${t.title}${t.isSequential?` <span style="font-size:10px;color:var(--danger);font-weight:700">⚡MUST DO</span>`:''}</div>
+          <div style="font-size:11px;color:var(--text2)">From ${t.fromDate} · ${fmtDur(t.durationMins)} · <span style="color:${t.priority==='critical'?'var(--danger)':t.priority==='high'?'var(--warn)':'var(--text2)'}">${t.priority}</span> · ${t.placed?'<span style="color:var(--success)">Scheduled ✓</span>':'Finding slot...'}</div>
+          ${t.isSequential?`<div style="font-size:10px;color:var(--danger);margin-top:2px">⚠️ Sequential — complete before advancing to next topic</div>`:''}
+        </div>
+        <button class="btn bg bsm" style="font-size:11px" onclick="App.removeCarryover('${t.id}')">✕</button>
+      </div>`).join(''));
+  } else cop.style.display='none';
+
+  // Conflicts
+  const hard=S.conflicts.filter(c=>c.severity==='hard');
+  const cb=qs('#conflict-bar');
+  cb.style.display=hard.length?'block':'none';
+  if(hard.length) txt(cb,`⚠️ ${hard.length} scheduling conflict${hard.length>1?'s':''} — manual review needed`);
+
+  // Timeline blocks
+  const blocks=S.schedTab==='all'?S.schedule:S.schedule.filter(b=>b.category===S.schedTab);
+  html(qs('#timeline'),blocks.length?blocks.map(b=>{
+    const done=b.status==='completed';
+    const curr=isToday&&!done&&b.sm<=nowM&&b.em>nowM;
+    const over=isToday&&!done&&b.em<nowM&&!b.isCarryover;
+    const cls=`tb ${CFG.CAT_CLS[b.category]||''} ${done?'done':''} ${b.lateShifted?'shifted':''} ${b.isCarryover?'carryover':''} ${b.overflow?'overflow':''} ${over&&!done?'missed':''}`;
+    return`<div class="${cls}" data-bid="${b.bid}">
+      <div class="tt">${b.startTime}${b.lateShifted?'<br><span style="color:var(--warn);font-size:9px">shifted</span>':''}</div>
+      <div class="tname">
+        ${b.icon||'📌'} ${b.title}
+        ${b.locked?'<span class="pill">🔒</span>':''}
+        ${b.isCarryover?'<span class="pill pill-warn">↩ carry</span>':''}
+        ${b.lateShifted?'<span class="pill pill-warn">⏰</span>':''}
+        ${b.overflow?'<span class="pill pill-danger">⚠️ overflow</span>':''}
+        ${curr?'<span class="pill pill-ok">● Now</span>':''}
+        ${over&&!done?'<span class="pill pill-danger">missed</span>':''}
+      </div>
+      <div class="tmeta">${fmtDur(b.em-b.sm)} · ${b.category}${b.notes?` · ${b.notes.slice(0,36)}`:''}</div>
+      ${!b.locked?`<div class="tacts">
+        ${!done?`<button class="btn bs bsm" onclick="App.doneBlock('${b.bid}')">✓ Done</button>`:`<span style="font-size:11px;color:var(--success)">✅ Done</span>`}
+        ${b.src==='evt'||b.isCarryover?`<button class="btn bg bsm" onclick="App.editBlock('${b.bid}')">✏️</button><button class="btn bg bsm" onclick="App.delBlock('${b.bid}')">🗑️</button>`:''}
+      </div>`:''}
+    </div>`;
+  }).join(''):'<div class="empty">No blocks for this filter.</div>');
+
+  // Missed tasks panel
+  const missed=getMissedTasks();
+  const mp=qs('#missed-panel');
+  if(missed.length&&isToday){
+    mp.style.display='block';
+    html(qs('#missed-list'),missed.map(b=>{
+      const willRollover=['study'].includes(b.category);
+      const skipMsg=['prayer','meal','sleep','exercise'].includes(b.category)?'Not rolled over — optional':'';
+      return`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(239,68,68,.15)">
+        <span style="font-size:16px">${b.icon||'📌'}</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600">${b.title}</div>
+          <div style="font-size:11px;color:var(--text2)">${b.startTime}–${b.endTime} · ${fmtDur(b.em-b.sm)}</div>
+          ${willRollover?`<div style="font-size:10px;color:var(--warn);margin-top:1px">↩ Auto-scheduled tomorrow with priority</div>`
+            :skipMsg?`<div style="font-size:10px;color:var(--text2);margin-top:1px">• ${skipMsg}</div>`:''}
+        </div>
+      </div>`;
+    }).join(''));
+  } else mp.style.display='none';
+
+  // Util footer
+  const totM=blocks.reduce((a,b)=>a+(b.em-b.sm),0);
+  const util=Math.round((totM/1440)*100);
+  html(qs('#util-f'),`
+    <span>Utilization: <strong>${util}%</strong></span>
+    <span>Free: <strong>${fmtDur(1440-totM)}</strong></span>
+    <div class="bwrap" style="flex:1;max-width:80px;height:4px"><div class="bfill" style="width:${util}%;background:${util>85?'var(--danger)':'var(--accent)'}"></div></div>`);
+}
+
+// ── RENDER: SLEEP ─────────────────────────────────────────────
+function renderSleep(){
+  qs('#stars').querySelectorAll('.star').forEach(s=>s.classList.toggle('on',+s.dataset.v<=S.sleepQ));
+  const st=sleepStats();
+  txt(qs('#stat-avg'),st.avg!=null?st.avg+'h':'--');
+  txt(qs('#stat-best'),st.best!=null?st.best+'h':'--');
+  const de=qs('#stat-debt');
+  txt(de,st.debt!=null?Math.abs(st.debt)+'h':'--');
+  if(de&&st.debt!=null) de.style.color=st.debt>0?'var(--danger)':st.debt>-1?'var(--warn)':'var(--success)';
+  const logs=S.sleepLogs.slice(-7),tgt=S.cfg.sleepTarget;
+  html(qs('#sbar'),logs.length?logs.map(l=>`<div class="sbar-item">
+    <span style="font-size:9px;color:var(--text2)">${l.dur}h</span>
+    <div class="sbar-fill" style="height:${clamp((l.dur/tgt)*100,5,100)*0.7}px;background:${l.dur>=tgt?'var(--success)':l.dur>=tgt-1?'var(--warn)':'var(--danger)'}"></div>
+  </div>`).join(''):'<div class="empty" style="font-size:12px;width:100%">No data yet</div>');
+  html(qs('#sbar-days'),logs.map(l=>`<div style="flex:1;text-align:center;font-size:9px;color:var(--text2)">${new Date(l.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short'})}</div>`).join(''));
+  html(qs('#sleep-hist'),S.sleepLogs.length?[...S.sleepLogs].reverse().slice(0,10).map(l=>{
+    const col=l.dur>=tgt?'var(--success)':l.dur>=tgt-1?'var(--warn)':'var(--danger)';
+    return`<li style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:14px;font-weight:600">${new Date(l.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+        <div style="font-size:11px;color:var(--text2)">${l.bedtime} → ${l.wakeTime}</div></div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:800;color:${col}">${l.dur}h</div>
+        <div style="font-size:13px;color:var(--warn)">${'★'.repeat(l.quality||0)}${'☆'.repeat(5-(l.quality||0))}</div>
+      </div>
+    </li>`;
+  }).join(''):`<li class="empty">No history yet. Log your first night!</li>`);
+}
+
+// ── RENDER: ROADMAP ───────────────────────────────────────────
+function renderRoad(){
+  const sc=readiness();
+  txt(qs('#r-pct'),sc+'%');
+  qs('#r-bar').style.width=sc+'%';
+  qs('#r-bar').style.background=sc>=70?'var(--success)':sc>=40?'var(--warn)':'var(--danger)';
+  txt(qs('#r-hint'),sc>=80?'🚀 Ready to apply!':sc>=60?'💪 Getting close!':sc>=40?'📈 Focus on high-weight skills.':'🧱 Keep building fundamentals.');
+  const hz=S.horizon;
+  const filt=g=>hz==='all'?true:hz==='weekly'?g.horizon==='weekly':hz==='monthly'?['weekly','monthly'].includes(g.horizon):g.horizon!=='lifetime';
+  const card=g=>`<div class="gc" style="border-color:${cc(g.category)}">
+    <span style="font-size:14px;font-weight:600;margin-bottom:6px;display:block">${g.title}</span>
+    <div class="bwrap" style="height:5px;margin-bottom:5px"><div class="bfill" style="width:${g.progress}%;background:${cc(g.category)}"></div></div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${g.progress}% · <strong>${g.priority}</strong> · ${g.horizon}${g.notes?` · ${g.notes.slice(0,40)}`:''}</div>
+    <div class="ga">
+      ${g.status!=='todo'?`<button class="btn bs bsm" onclick="App.goalStatus('${g.id}','todo')">To Do</button>`:''}
+      ${g.status!=='in-progress'?`<button class="btn bp bsm" onclick="App.goalStatus('${g.id}','in-progress')">In Progress</button>`:''}
+      ${g.status!=='done'?`<button class="btn bsm" style="background:var(--success);color:#fff" onclick="App.goalStatus('${g.id}','done')">✓ Done</button>`:'<span style="color:var(--success);font-size:12px">✅ Done</span>'}
+      <button class="btn bg bsm" onclick="App.delGoal('${g.id}')">🗑️</button>
+    </div>
+  </div>`;
+  const f=S.goals.filter(filt);
+  html(qs('#col-todo'),f.filter(g=>g.status==='todo').map(card).join('')||'<div class="empty">None here!</div>');
+  html(qs('#col-ip'),  f.filter(g=>g.status==='in-progress').map(card).join('')||'<div class="empty">None yet.</div>');
+  html(qs('#col-done'),f.filter(g=>g.status==='done').map(card).join('')||'<div class="empty">Complete some tasks!</div>');
+}
+
+// ── RENDER: ADDICTION ─────────────────────────────────────────
+function renderAddict(){
+  const subs=Object.values(S.substances);
+  const minS=subs.reduce((a,s)=>Math.min(a,s.streakDays||0),Infinity);
+  const maxS=subs.reduce((a,s)=>Math.max(a,s.bestStreak||0),0);
+  const totR=subs.reduce((a,s)=>a+(s.relapses||0),0);
+  html(qs('#streak-grid'),`
+    <div class="sb"><span class="sv">${isFinite(minS)?minS:0}d</span><span class="sl2">Clean Streak</span></div>
+    <div class="sb"><span class="sv">${maxS}d</span><span class="sl2">Best Streak</span></div>
+    <div class="sb"><span class="sv">${totR}</span><span class="sl2">Relapses</span></div>`);
+  html(qs('#subs-list'),subs.map(s=>{
+    const pct=clamp((s.todayCount/Math.max(s.dailyLimit,1))*100,0,100);
+    const over=s.todayCount>s.dailyLimit;
+    const col=over?'var(--danger)':'var(--success)';
+    const isAggressive=s.aggressiveQuit||false;
+    const newLimit=isAggressive?Math.max(0,Math.ceil(s.dailyLimit*0.7)):s.dailyLimit;
+    return`<div class="subc" style="border-color:${col};${isAggressive?'border-left:5px solid var(--danger)':''}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:24px">${s.icon}</span>
+        <span style="font-size:16px;font-weight:700;flex:1">${s.label}${isAggressive?` <span style="color:var(--danger);font-size:11px;font-weight:700">⚡AGGRESSIVE</span>`:''}</span>
+        <span style="font-size:11px;color:var(--text2)">Limit: ${newLimit}/${s.unit}${isAggressive?` (was ${s.dailyLimit})`:''}</span>
+      </div>
+      <div class="bwrap" style="height:7px;margin-bottom:8px"><div class="bfill" style="width:${Math.min(pct,100)}%;background:${pct>100?'var(--danger)':col}"></div></div>
+      ${over?`<p style="font-size:12px;color:var(--danger);margin-bottom:6px">⚠️ Over by ${s.todayCount-newLimit}</p>`:''}
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:var(--bg);border-radius:var(--rs);padding:10px;text-align:center">
+          <div style="font-size:10px;color:var(--text2)">Log Amount Today</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px">
+            <button class="cbtn" style="width:28px;height:28px;font-size:14px" onclick="App.chgSub('${s.id}',-1)">−</button>
+            <input type="number" min="0" max="20" value="${s.todayCount}" style="width:40px;text-align:center;font-size:16px;font-weight:700;background:none;border:none;color:${col}" onchange="App.setSub('${s.id}',parseInt(this.value)||0)"/>
+            <button class="cbtn" style="width:28px;height:28px;font-size:14px" onclick="App.chgSub('${s.id}',1)">+</button>
+          </div>
+        </div>
+        
+        <div style="background:var(--bg);border-radius:var(--rs);padding:10px;text-align:center">
+          <div style="font-size:10px;color:var(--text2)">Quit Strategy</div>
+          <label class="toggle" style="margin-top:6px;justify-content:center;display:flex">
+            <input type="checkbox" ${isAggressive?'checked':''} onchange="App.setAggressiveQuit('${s.id}',this.checked)"/>
+            <div class="ttrack" style="margin:0 6px"></div>
+          </label>
+          <div style="font-size:9px;color:var(--text2);margin-top:4px">${isAggressive?'Aggressive -30%':'Gradual'}</div>
+        </div>
+      </div>
+      
+      <div style="text-align:center;font-size:12px;color:var(--text2)">💰 Saved: ₹${Math.max(0,(s.baseline-s.todayCount)*s.costPerUnit)}</div>
+    </div>`;
+  }).join(''));
+  html(qs('#urge-list'),S.urges.length?[...S.urges].reverse().slice(0,8).map(u=>`
+    <li style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:8px">
+      <div><span style="font-size:13px;font-weight:600">${u.trigger}</span><span style="font-size:12px;color:var(--text2)"> · ${u.intensity}/10</span>
+        ${u.note?`<div style="font-size:11px;color:var(--text2)">${u.note}</div>`:''}
+      </div><span style="font-size:18px">${u.resisted?'✅':'❌'}</span>
+    </li>`).join(''):'<li class="empty">No urges logged. Stay strong! 💪</li>');
+}
+
+// ── RENDER: SETTINGS ─────────────────────────────────────────
+function renderSettings(){
+  const ni=qs('#inp-name');if(ni&&!ni.matches(':focus'))ni.value=S.cfg.name||'';
+  const si=qs('#inp-stgt');if(si&&!si.matches(':focus'))si.value=S.cfg.sleepTarget;
+  const wi=qs('#inp-wtgt');if(wi&&!wi.matches(':focus'))wi.value=S.cfg.studyTarget;
+  const gk=qs('#inp-gemini-key');if(gk&&!gk.matches(':focus'))gk.value=S.cfg.geminiKey||'';
+  const perm=typeof Notification!=='undefined'?Notification.permission:'unsupported';
+  txt(qs('#notif-status'),perm==='granted'?'✅ Enabled':perm==='denied'?'❌ Blocked':'⚠️ Not Set');
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('on',b.dataset.t===S.cfg.theme));
+  document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('on',s.dataset.c===S.cfg.accent));
+}
+
+// ── APP ACTIONS ───────────────────────────────────────────────
+const App={
+  nav(page){
+    S.page=page;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    qs(`#page-${page}`)?.classList.add('active');
+    document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.p===page));
+    qs('#main').scrollTop=0;
+    render();
+  },
+
+  loadSleepData(){
+    const sleepTimeInput = qs('#inp-sleep-time').value;
+    const wakeTimeInput = qs('#inp-wake-time').value;
+    
+    if (!sleepTimeInput || !wakeTimeInput) {
+      toast('Please enter both sleep and wake times', 'warning');
+      return;
+    }
+    
+    saveSleepData(sleepTimeInput, wakeTimeInput);
+    const wakeM = toMins(wakeTimeInput);
+    const prayerStatus = getPrayerStatus(wakeM);
+    updatePrayerStatusDisplay(prayerStatus, wakeM);
+    
+    if (wakeM > toMins('12:00')) {
+      const timeline = generateSleepShiftTimeline(wakeM);
+      if (timeline) {
+        toast(`📊 Sleep shift needed: ${timeline.length} days to reach 11:30 PM-6:00 AM`, 'info', 4000);
+      }
+    }
+    
+    S.date = todayStr();
+    reflow();
+    toast('✅ Sleep data saved & schedule updated!', 'success', 3000);
+  },
+
+  async generateWithClaude(){
+    const sleepTimeInput = qs('#inp-sleep-time').value;
+    const wakeTimeInput = qs('#inp-wake-time').value;
+
+    if (!sleepTimeInput || !wakeTimeInput) {
+      toast('Please enter both sleep and wake times', 'warning');
+      return;
+    }
+
+    const apiKey = S.cfg.geminiKey || '';
+    if (!apiKey) {
+      toast('❌ Add your Gemini API key in Settings first', 'error', 4000);
+      App.nav('settings');
+      return;
+    }
+
+    saveSleepData(sleepTimeInput, wakeTimeInput);
+    showLoadingIndicator('🔄 Generating schedule with Gemini AI...');
+
+    try {
+      const goalsText = S.goals
+        .filter(g => g.category === 'study' && g.status !== 'completed')
+        .slice(0, 5)
+        .map((g, i) => `${i+1}. ${g.title} (Priority: ${g.priority})`)
+        .join('\n') || 'No specific goals';
+
+      const habitsText = S.habits
+        .slice(0, 5)
+        .map(h => `- ${h.name || h.title} (general)`)
+        .join('\n') || 'No specific habits';
+
+      const systemPrompt = `You are a smart scheduling assistant for a Cloud Engineer's transformation program.
+Return ONLY valid JSON matching this schema exactly, no markdown, no explanation:
+{"schedule":[{"time":"HH:MM","title":"Task","duration":"60min","category":"Study","locked":false}],"prayers":{"morning":true,"evening":true,"reason":""},"meals":{"breakfast":"HH:MM","lunch":"HH:MM","dinner":"20:00","conflicts":[]},"gym":"HH:MM-HH:MM","conflicts":[],"warnings":[],"recommendations":[],"totalHours":0,"availableHours":0,"overflow":false}
+Rules: Morning Prayer 08:00-09:00, Evening Prayer 18:00-18:30. If wake>09:00 skip both. Breakfast=wake+90min, Lunch=breakfast+210min, Dinner fixed 20:00. All times 24h HH:MM format. Duration format: "XXmin".`;
+
+      const userPrompt = `Sleep: ${sleepTimeInput}, Wake: ${wakeTimeInput}\nGoals:\n${goalsText}\nHabits:\n${habitsText}\nGenerate daily schedule. Return ONLY valid JSON.`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            contents: [{role:'user', parts:[{text: systemPrompt + '\n\n' + userPrompt}]}],
+            generationConfig: {temperature: 0.2, maxOutputTokens: 2048, responseMimeType: 'application/json'}
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error?.message || `API Error ${response.status}`);
+      }
+
+      const data = await response.json();
+      let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      rawText = rawText.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+
+      const claudeSchedule = JSON.parse(rawText);
+
+      const schedule = claudeSchedule.schedule.map((item, idx) => ({
+        bid: uid('c' + idx),
+        title: item.title || 'Untitled',
+        category: (item.category || 'other').toLowerCase(),
+        icon: getCategoryIcon((item.category || 'other').toLowerCase()),
+        sm: toMins(item.time),
+        em: toMins(item.time) + parseInt(item.duration) || 60,
+        startTime: item.time,
+        endTime: toTime(toMins(item.time) + (parseInt(item.duration) || 60)),
+        status: 'pending',
+        locked: item.locked || false,
+        notes: '',
+        isClaudeGenerated: true
+      }));
+
+      S.schedule = schedule.sort((a, b) => a.sm - b.sm);
+      S.date = todayStr();
+
+      if (claudeSchedule.warnings?.length) {
+        claudeSchedule.warnings.forEach(w => toast('⚠️ ' + w, 'warning', 4000));
+      }
+      if (claudeSchedule.overflow) {
+        toast(`⚠️ Schedule overflow: ${(claudeSchedule.totalHours||0).toFixed(1)}h needed vs ${(claudeSchedule.availableHours||0).toFixed(1)}h available`, 'warning', 5000);
+      }
+
+      render();
+      toast('✅ Schedule generated! ' +
+        `Prayers: ${claudeSchedule.prayers?.morning ? '✓' : '✗'}/${claudeSchedule.prayers?.evening ? '✓' : '✗'} ` +
+        `Meals: B:${claudeSchedule.meals?.breakfast} L:${claudeSchedule.meals?.lunch} D:${claudeSchedule.meals?.dinner}`,
+        'success', 4000);
+
+    } catch (err) {
+      console.error('Gemini error:', err);
+      toast('❌ Gemini error: ' + err.message, 'error', 5000);
+    } finally {
+      hideLoadingIndicator();
+    }
+  },
+
+  prevDay(){S.date=addDays(S.date,-1);reflow();},
+  nextDay(){S.date=addDays(S.date,1);reflow();},
+
+  setTab(btn,tab){
+    S.schedTab=tab;
+    qs('#sched-tabs').querySelectorAll('.btn').forEach(b=>b.className=b===btn?'btn bp bsm':'btn bs bsm');
+    renderSched();
+  },
+
+  setHz(btn,hz){
+    S.horizon=hz;
+    document.querySelectorAll('[data-hz]').forEach(b=>b.className=b===btn?'btn bp bsm':'btn bs bsm');
+    renderRoad();
+  },
+
+  // ── WAKE TIME ──
+  logWake(){
+    const inp=qs('#inp-wake-actual').value;
+    if(!inp){toast('Please enter your actual wake time.','warning');return;}
+    const wakeM=toMins(inp);
+    const schedM=toMins(S.cfg.scheduledWake||'06:00');
+    S.wakeOverrides[S.date]=wakeM;
+    App.closeModal('modal-wake');
+    if(wakeM>schedM){
+      const delta=wakeM-schedM;
+      toast(`⏰ Woke up ${fmtDur(delta)} late — schedule rebuilt!`,'warning',3500);
+    } else {
+      toast('Wake time logged. Schedule updated.','success');
+    }
+    reflow();
+    setTimeout(()=>App.autoRollover(),600);
+  },
+
+  clearWake(){
+    delete S.wakeOverrides[S.date];
+    App.closeModal('modal-wake');
+    toast('Wake override cleared. Back to default schedule.','info');
+    reflow();
+  },
+
+  // ── SMART AUTO-ROLLOVER WITH GOAL LINKING ──
+  autoRollover(){
+    // Get all critical/high study goals that are in-progress (not done)
+    const activeStudyGoals=S.goals.filter(g=>
+      g.category==='study' && g.status==='in-progress' && 
+      ['critical','high'].includes(g.priority)
+    );
+
+    const nowM=new Date().getHours()*60+new Date().getMinutes();
+    const today=todayStr();
+    if(S.date!==today) return;
+
+    // Find truly missed STUDY blocks only (sequential dependency)
+    const missedStudy=S.schedule.filter(b=>
+      b.em<nowM &&
+      b.status!=='completed' &&
+      !b.locked &&
+      !b.isCarryover &&
+      b.category==='study'
+    );
+
+    let added=0;
+    for(const b of missedStudy){
+      const alreadyQueued=S.carryover.some(c=>
+        c.fromDate===today && (c.title.replace(' ↩','')===b.title||c.sourceId===b.bid)
+      );
+      if(alreadyQueued) continue;
+
+      // Link to matching goal if one exists
+      const linkedGoal=activeStudyGoals.find(g=>
+        b.title.toLowerCase().includes(g.title.slice(0,20).toLowerCase())||
+        g.notes?.toLowerCase().includes(b.title.slice(0,15).toLowerCase())
+      );
+
+      // Find next available date
+      let targetDate=addDays(today,1);
+      let attempts=0;
+      while(attempts<7){
+        const alreadyOnDate=S.carryover.some(c=>c.targetDate===targetDate&&c.sourceId===b.bid);
+        if(!alreadyOnDate) break;
+        targetDate=addDays(targetDate,1);
+        attempts++;
+      }
+
+      // EXTENDED TIME: +30% for rollover (e.g., 3h → 4h)
+      const extendedDur=Math.ceil((b.em-b.sm)*1.3/5)*5; // round to nearest 5min
+
+      S.carryover.push({
+        id:uid('co'),
+        sourceId:b.bid,
+        title:b.title+' ↩',
+        category:b.category,
+        durationMins:Math.min(extendedDur,180), // cap at 3h
+        fromDate:today,
+        targetDate,
+        priority:'critical',
+        notes:`Missed ${today} — extend ${Math.round(((extendedDur/(b.em-b.sm))-1)*100)}% · ${linkedGoal?'Goal: '+linkedGoal.title:'Chapter/topic blocking'}`,
+        icon:'📚',
+        goalId:linkedGoal?.id,
+        placed:false,
+        isSequential:true
+      });
+      added++;
+    }
+
+    if(added>0){
+      S.carryover.sort((a,b)=>{
+        if(a.targetDate!==b.targetDate) return a.targetDate.localeCompare(b.targetDate);
+        const pri={critical:0,high:1,medium:2,low:3};
+        return (pri[a.priority]||2)-(pri[b.priority]||2);
+      });
+      reflow();
+      toast(`↩ ${added} study task${added>1?'s':''} auto-scheduled (+time) with priority!`,'warning',3500);
+    }
+  },
+
+  // ── INTELLIGENT RESCHEDULE ──
+  // When new event/shift logged, intelligently move carryover to find best slots
+  intelligentReschedule(){
+    if(S.date!==todayStr()) return;
+    // Rebuild schedule with current carryover — forces re-injection into new free slots
+    S.schedule=buildSchedule();
+    const todayCO=S.carryover.filter(t=>t.targetDate===S.date&&!t.placed);
+    if(todayCO.length){
+      const withCO=injectCarryover(S.schedule,todayCO);
+      S.schedule=withCO.sort((a,b)=>a.sm-b.sm);
+      // Mark placed
+      withCO.filter(b=>b.isCarryover).forEach(b=>{
+        const co=S.carryover.find(c=>c.id===b.id);
+        if(co) co.placed=true;
+      });
+    }
+    renderSched();
+    toast('Schedule re-optimized for new event 🔄','info',2500);
+  },
+
+  removeCarryover(id){
+    S.carryover=S.carryover.filter(c=>c.id!==id);
+    reflow();
+    toast('Carryover task removed.','info');
+  },
+
+  clearAllCarryover(){
+    S.carryover=S.carryover.filter(c=>c.targetDate!==S.date);
+    reflow();
+    toast('Carryover cleared for today.','info');
+  },
+
+  // ── EVENTS ──
+  openEvent(startTime,cat,date){
+    qs('#ev-eid').value='';
+    txt(qs('#ev-modal-title'),'Add Activity / Event');
+    qs('#ev-title').value='';
+    qs('#ev-cat').value=cat||'study';
+    qs('#ev-date').value=date||S.date;
+    qs('#ev-start').value=startTime||'';
+    qs('#ev-end').value='';
+    qs('#ev-notes').value='';
+    qs('#ev-pri').value='medium';
+    qs('#ev-autoprep').checked=true;
+    qs('#prep-toggle-wrap').style.display=(cat==='event')?'block':'none';
+    App.openModal('modal-event');
+  },
+
+  editBlock(bid){
+    const b=S.schedule.find(b=>b.bid===bid);
+    if(!b){return;}
+    if(b.src==='act'&&!b.isCarryover){toast('Cannot edit default activities. Add a custom event instead.','warning');return;}
+    const e=b.isCarryover?null:S.events.find(e=>e.id===b.id);
+    if(!e&&!b.isCarryover){toast('Event not found.','warning');return;}
+    if(b.isCarryover){
+      // Edit carryover: remove from carryover, open as new event
+      S.carryover=S.carryover.filter(c=>c.id!==b.id);
+      App.openEvent(b.startTime,b.category,S.date);
+      qs('#ev-title').value=b.title.replace(' (carried over)','');
+      qs('#ev-end').value=b.endTime;
+      reflow();
+      return;
+    }
+    qs('#ev-eid').value=e.id;
+    txt(qs('#ev-modal-title'),'Edit Event');
+    qs('#ev-date').value=e.date;
+    qs('#ev-title').value=e.title;
+    qs('#ev-cat').value=e.category;
+    qs('#ev-start').value=e.startTime;
+    qs('#ev-end').value=e.endTime;
+    qs('#ev-notes').value=e.notes||'';
+    qs('#ev-pri').value=e.priority||'medium';
+    qs('#prep-toggle-wrap').style.display=e.category==='event'?'block':'none';
+    App.openModal('modal-event');
+  },
+
+  saveEvent(){
+    const title=(qs('#ev-title').value||'').trim();
+    const cat=qs('#ev-cat').value;
+    const evDate=qs('#ev-date').value||S.date;
+    const start=qs('#ev-start').value;
+    const end=qs('#ev-end').value;
+    const notes=(qs('#ev-notes').value||'').trim();
+    const pri=qs('#ev-pri').value;
+    const eid=qs('#ev-eid').value;
+    const autoPrep=qs('#ev-autoprep').checked;
+    const isShift=qs('#ev-isshift')?.checked||false; // variable shift timing
+
+    if(!title){toast('Please enter a title.','warning');return;}
+    if(!start||!end){toast('Please set start and end times.','warning');return;}
+    if(toMins(end)<=toMins(start)){toast('End time must be after start time.','warning');return;}
+    if(evDate<todayStr()){toast('Cannot add events in the past.','warning');return;}
+
+    const ico=CFG.CAT_ICO[cat]||'📌';
+    const isNew=!eid;
+
+    if(eid){
+      const idx=S.events.findIndex(e=>e.id===eid);
+      if(idx!==-1) S.events[idx]={...S.events[idx],title,category:cat,date:evDate,startTime:start,endTime:end,notes,priority:pri,icon:ico,isShift};
+    } else {
+      S.events.push({id:uid('ev'),date:evDate,title,category:cat,startTime:start,endTime:end,notes,priority:pri,status:'pending',icon:ico,isShift});
+    }
+
+    // Auto-prep block for job/appointment events
+    if(isNew&&cat==='event'&&autoPrep){
+      const sm=toMins(start);
+      const prepSm=Math.max(sm-60, toMins('06:00'));
+      if(sm-prepSm>=30){
+        S.events.push({id:uid('prep'),date:evDate,title:`📝 Prep: ${title}`,category:'study',
+          startTime:toTime(prepSm),endTime:start,notes:`Preparation for ${title}`,
+          priority:pri,status:'pending',icon:'📝',isAutoPre:true});
+        toast(`Auto-added prep block before "${title}" on ${shortDate(evDate)}!`,'success',3500);
+      }
+    }
+
+    App.closeModal('modal-event');
+    S.date=evDate;
+    reflow();
+    // If shift/appointment marked, trigger intelligent reschedule for carryover
+    if(isNew&&cat==='event'&&isShift){
+      setTimeout(()=>App.intelligentReschedule(),800);
+      toast(eid?'Event updated!':evDate===todayStr()?'Shift logged! Schedule re-optimizing...':'Event scheduled + reschedule triggered ✅','success');
+    } else {
+      toast(eid?'Event updated!':evDate===todayStr()?'Event added!':'Event scheduled for '+shortDate(evDate)+' ✅','success');
+    }
+  },
+
+  completeTask(){
+    const actualStr=qs('#inp-comp-actual').value;
+    if(!actualStr){toast('Please set actual completion time','warning');return;}
+    
+    const task=S.currentCompletingTask;
+    const actualM=toMins(actualStr);
+    const delta=actualM-task.plannedEnd; // negative = early, positive = late
+    
+    // Find the task in schedule
+    const b=S.schedule.find(b=>b.bid===task.bid);
+    if(!b)return;
+    
+    // Mark as done
+    b.status='completed';
+    b.actualEnd=actualM;
+    if(b.src==='evt'){const e=S.events.find(e=>e.id===b.id);if(e)e.status='completed';}
+    if(b.isCarryover){
+      const co=S.carryover.find(c=>c.id===b.id||c.title===b.title);
+      if(co) S.carryover=S.carryover.filter(c=>c!==co);
+    }
+    
+    S.completionTimes[task.bid]=actualM;
+    App.closeModal('modal-complete-time');
+    
+    // Handle scenarios based on delta
+    if(delta<0){
+      // SCENARIO 1: Finished EARLY → Freed up time
+      const freedMins=Math.abs(delta);
+      toast(`✓ "${b.title}" done ${fmtDur(freedMins)} early! 🎉`,'success');
+      
+      // Offer me time or gardening if slot ≥30 min
+      if(freedMins>=30){
+        const hour=Math.floor(actualM/60);
+        const isMorning=hour>=6&&hour<12;
+        const isEvening=hour>=17&&hour<18; // 5-6 PM
+        
+        if(isMorning||isEvening){
+          if(confirm(`${fmtDur(freedMins)} freed up${isMorning?' in morning':' in evening'}. Suggest gardening?`)){
+            App.suggestGardening(actualM,freedMins);
+          }
+        }
+        if(confirm(`Want to schedule me-time/break for ${fmtDur(Math.min(freedMins,60))}?`)){
+          App.suggestMeTime(actualM,freedMins);
+        }
+      }
+      
+      // Shift same-category tasks forward
+      App.shiftSameCategoryForward(task.bid,freedMins);
+      reflow();
+    } else if(delta>0){
+      // SCENARIO 2: Finished LATE → Behind schedule
+      toast(`⚠️ "${b.title}" took ${fmtDur(delta)} longer. Need to adjust remaining tasks.`,'warning',3500);
+      // Queue remaining tasks for user decision
+      App.queueTaskAdjustments(task.bid,delta);
+    } else {
+      toast(`✓ "${b.title}" done on time!`,'success');
+      reflow();
+    }
+    
+    setTimeout(()=>App.autoRollover(),500);
+  },
+
+  shiftSameCategoryForward(bid,freedMins){
+    const completedTask=S.schedule.find(b=>b.bid===bid);
+    if(!completedTask)return;
+    
+    // Find next same-category tasks and shift them forward
+    let shiftedCount=0;
+    for(const b of S.schedule){
+      if(b.bid===bid||b.status==='completed'||b.locked) continue;
+      if(b.category===completedTask.category&&b.sm>=completedTask.em){
+        b.sm-=freedMins;
+        b.em-=freedMins;
+        b.startTime=toTime(b.sm);
+        b.endTime=toTime(b.em);
+        b.shifted=true;
+        shiftedCount++;
+      }
+    }
+    
+    if(shiftedCount>0){
+      toast(`${shiftedCount} ${completedTask.category} task${shiftedCount>1?'s':''} shifted forward`,'info');
+    }
+  },
+
+  queueTaskAdjustments(bid,overageMins){
+    const completedTask=S.schedule.find(b=>b.bid===bid);
+    if(!completedTask)return;
+    
+    // Find tasks after this one that might need adjustment
+    const affectedTasks=S.schedule.filter(b=>
+      b.bid!==bid && b.status!=='completed' && b.locked===false &&
+      b.sm>=completedTask.em && !b.isCarryover
+    ).sort((a,b)=>a.sm-b.sm);
+    
+    if(affectedTasks.length===0){
+      toast('No tasks to adjust','info');
+      return;
+    }
+    
+    // Show first affected task
+    const nextTask=affectedTasks[0];
+    const msg=`Your schedule is ${fmtDur(overageMins)} behind. "${nextTask.title}" starts at ${nextTask.startTime}.`;
+    const taskInfo=`<strong>${nextTask.icon||'📌'} ${nextTask.title}</strong><br>Planned: ${nextTask.startTime}–${nextTask.endTime} (${fmtDur(nextTask.em-nextTask.sm)})`;
+    
+    txt(qs('#adjust-msg'),msg);
+    html(qs('#adjust-task-info'),taskInfo);
+    
+    // Store queue
+    S.taskAdjustmentQueue=affectedTasks.map(t=>({
+      bid:t.bid,title:t.title,category:t.category,sm:t.sm,em:t.em
+    }));
+    
+    App.openModal('modal-task-adjust');
+  },
+
+  adjustTask(action){
+    if(S.taskAdjustmentQueue.length===0){
+      App.closeModal('modal-task-adjust');
+      return;
+    }
+    
+    const nextTask=S.taskAdjustmentQueue[0];
+    const b=S.schedule.find(b=>b.bid===nextTask.bid);
+    if(!b){
+      S.taskAdjustmentQueue.shift();
+      if(S.taskAdjustmentQueue.length>0) App.adjustTask(action);
+      return;
+    }
+    
+    if(action==='keep'){
+      toast(`✓ Keeping "${b.title}" as scheduled`,'info');
+    } else if(action==='compress'){
+      // Compress based on category
+      let minDur=20; // default minimum
+      if(b.category==='meal') minDur=15; // never below 15 min
+      if(b.category==='study') minDur=30; // study min 30 min
+      if(['me-time','gardening','reading'].includes(b.category)) minDur=10; // these compress first
+      
+      const origDur=b.em-b.sm;
+      const newDur=Math.max(minDur,Math.ceil(origDur*0.7));
+      const compressed=origDur-newDur;
+      
+      b.em=b.sm+newDur;
+      b.endTime=toTime(b.em);
+      toast(`📉 Compressed "${b.title}" by ${fmtDur(compressed)}`,'success');
+    } else if(action==='skip'){
+      if(b.category==='study'){
+        toast('⚠️ Study tasks should never be skipped! Compressing instead.','warning');
+        App.adjustTask('compress');
+        return;
+      }
+      b.status='skipped';
+      toast(`⏭️ Rescheduling "${b.title}" for tomorrow`,'warning');
+      // Move to carryover
+      S.carryover.push({
+        id:uid('co'),sourceId:b.bid,title:b.title+' ↩',category:b.category,
+        durationMins:b.em-b.sm,fromDate:todayStr(),targetDate:addDays(todayStr(),1),
+        priority:'medium',notes:'Skipped due to schedule pressure',icon:b.icon,placed:false
+      });
+    }
+    
+    // Move to next task
+    S.taskAdjustmentQueue.shift();
+    if(S.taskAdjustmentQueue.length>0){
+      setTimeout(()=>{
+        const next=S.taskAdjustmentQueue[0];
+        const nb=S.schedule.find(b=>b.bid===next.bid);
+        txt(qs('#adjust-msg'),`Next: "${next.title}" at ${next.startTime}`);
+        html(qs('#adjust-task-info'),`<strong>${nb.icon||'📌'} ${next.title}</strong><br>${toTime(next.sm)}–${toTime(next.em)}`);
+      },800);
+    } else {
+      toast('✅ Schedule adjusted','success');
+      App.closeModal('modal-task-adjust');
+      reflow();
+    }
+  },
+
+  suggestMeTime(startM,freedMins){
+    const dur=Math.min(freedMins,60);
+    const newTask={
+      id:uid('ev'),date:todayStr(),title:'☕ Me Time / Break',category:'other',
+      startTime:toTime(startM),endTime:toTime(startM+dur),
+      status:'pending',priority:'low',icon:'☕',notes:'Suggested break'
+    };
+    S.events.push(newTask);
+    toast(`☕ Me-time block added: ${toTime(startM)}–${toTime(startM+dur)}`,'success');
+  },
+
+  suggestGardening(startM,freedMins){
+    const dur=Math.min(freedMins,90);
+    const newTask={
+      id:uid('ev'),date:todayStr(),title:'🌱 Gardening',category:'other',
+      startTime:toTime(startM),endTime:toTime(startM+dur),
+      status:'pending',priority:'medium',icon:'🌱',notes:'Suggested gardening session'
+    };
+    S.events.push(newTask);
+    toast(`🌱 Gardening block added: ${toTime(startM)}–${toTime(startM+dur)}`,'success');
+  },
+
+  delBlock(bid){
+    const b=S.schedule.find(b=>b.bid===bid);
+    if(!b){return;}
+    if(b.isCarryover){App.removeCarryover(b.id);return;}
+    if(b.src==='act'){toast('Cannot delete default activities.','warning');return;}
+    S.events=S.events.filter(e=>e.id!==b.id);
+    reflow(); toast('Event removed.','info');
+  },
+
+  // ── SLEEP ──
+  logSleep(){
+    const bed=qs('#inp-bed').value,wake=qs('#inp-wake').value;
+    if(!bed||!wake){toast('Enter bedtime and wake time.','warning');return;}
+    let bm=toMins(bed),wm=toMins(wake);
+    if(wm<bm)wm+=1440;
+    const dur=+((wm-bm)/60).toFixed(2);
+    const entry={date:S.date,bedtime:bed,wakeTime:wake,quality:S.sleepQ,dur,notes:(qs('#inp-snotes').value||'').trim()};
+    const idx=S.sleepLogs.findIndex(l=>l.date===S.date);
+    if(idx!==-1)S.sleepLogs[idx]=entry;else S.sleepLogs.push(entry);
+    // SCENARIO 5: Check for nap started early
+    const scheduledNap=S.schedule.find(b=>b.category==='sleep'&&b.title.toLowerCase().includes('nap'));
+    if(scheduledNap&&bm<scheduledNap.sm){
+      const earlyMins=scheduledNap.sm-bm;
+      if(confirm(`🛏️ Nap starts ${fmtDur(earlyMins)} early. Keep original ${fmtDur(scheduledNap.em-scheduledNap.sm)}h duration?\n(Everything after shifts forward)`)){
+        const newEM=bm+(scheduledNap.em-scheduledNap.sm);
+        S.schedule.forEach(b=>{
+          if(b.sm>=scheduledNap.em&&!b.locked){
+            const shift=newEM-scheduledNap.em;
+            b.sm+=shift; b.em+=shift;
+            b.startTime=toTime(b.sm); b.endTime=toTime(b.em);
+          }
+        });
+        toast(`🛏️ Nap duration kept, tasks after shifted forward`,'success');
+      }
+    }
+    // Also set wake override if different from scheduled
+    const schedWakeM=toMins(S.cfg.scheduledWake||'06:00');
+    const actualWakeM=toMins(wake);
+    if(actualWakeM>schedWakeM+15&&S.date===todayStr()){
+      S.wakeOverrides[S.date]=actualWakeM;
+      toast(`Sleep + wake logged — schedule adjusted for ${fmtDur(actualWakeM-schedWakeM)} late start 😴`,'success',3500);
+    } else toast(`Sleep logged: ${dur}h 😴`,'success');
+    reflow();
+    setTimeout(()=>App.autoRollover(),500);
+  },
+
+  // ── HABITS ──
+  toggleHabit(id){const h=S.habits.find(h=>h.id===id);if(!h)return;h.done=!h.done;if(h.done)h.streak++;renderDash();},
+  saveHabit(){
+    const name=(qs('#h-name').value||'').trim(),icon=(qs('#h-icon').value||'').trim()||'✅';
+    if(!name){toast('Please enter a habit name.','warning');return;}
+    S.habits.push({id:uid('h'),name,icon,streak:0,done:false});
+    App.closeModal('modal-habit');qs('#h-name').value='';qs('#h-icon').value='';
+    renderDash();toast('Habit added!','success');
+  },
+
+  // ── GOALS ──
+  saveGoal(){
+    const title=(qs('#goal-title').value||'').trim();
+    if(!title){toast('Please enter a goal title.','warning');return;}
+    S.goals.push({id:uid('g'),title,category:qs('#goal-cat').value,horizon:qs('#goal-hz').value,
+      priority:qs('#goal-pri').value,notes:(qs('#goal-notes').value||'').trim(),status:'todo',progress:0});
+    App.closeModal('modal-goal');qs('#goal-title').value='';qs('#goal-notes').value='';
+    renderRoad();toast('Goal added! 🎯','success');
+  },
+
+  goalStatus(id,status){
+    const g=S.goals.find(g=>g.id===id);if(!g)return;
+    g.status=status;if(status==='done')g.progress=100;else if(status==='in-progress'&&g.progress<10)g.progress=10;
+    renderRoad();toast(status==='done'?'🎉 Goal complete!':'Status updated.','success');
+  },
+
+  delGoal(id){S.goals=S.goals.filter(g=>g.id!==id);renderRoad();toast('Goal removed.','info');},
+
+  // ── SUBSTANCES ──
+  chgSub(id,delta){
+    const s=S.substances[id];if(!s)return;
+    s.todayCount=Math.max(0,s.todayCount+delta);
+    const limitToCheck=s.aggressiveQuit?Math.max(0,Math.ceil(s.dailyLimit*0.7)):s.dailyLimit;
+    if(delta>0&&s.todayCount>limitToCheck)toast(`⚠️ Over aggressive limit for ${s.label}!`,'warning');
+    renderAddict();
+  },
+
+  setSub(id,count){
+    const s=S.substances[id];if(!s)return;
+    s.todayCount=Math.max(0,count);
+    const limitToCheck=s.aggressiveQuit?Math.max(0,Math.ceil(s.dailyLimit*0.7)):s.dailyLimit;
+    if(count>limitToCheck)toast(`⚠️ Over limit for ${s.label}! (${count}/${limitToCheck})`,'warning');
+    renderAddict();
+  },
+
+  setAggressiveQuit(id,aggressive){
+    const s=S.substances[id];if(!s)return;
+    s.aggressiveQuit=aggressive;
+    const newLimit=aggressive?Math.max(0,Math.ceil(s.dailyLimit*0.7)):s.dailyLimit;
+    toast(aggressive?`⚡ Aggressive quit enabled for ${s.label}! New limit: ${newLimit}/${s.unit}`:`Switched to gradual quitting for ${s.label}`,'success',3000);
+    renderAddict();
+  },
+
+  saveUrge(){
+    const trigger=qs('#u-trigger').value,intensity=+qs('#u-int').value||6;
+    const note=(qs('#u-note').value||'').trim(),resisted=qs('#u-resisted').checked;
+    S.urges.push({id:uid('u'),timestamp:new Date().toISOString(),trigger,intensity,note,resisted});
+    App.closeModal('modal-urge');qs('#u-note').value='';qs('#u-int').value=6;txt(qs('#u-int-val'),'6');
+    renderAddict();toast(resisted?'💪 Great job resisting!':'Logged. Keep going!',resisted?'success':'info');
+  },
+
+  // ── SETTINGS ──
+  setPref(k,v){S.cfg[k]=v;if(['sleepTarget','studyTarget','scheduledWake','scheduledBed'].includes(k))reflow();else render();},
+  setTheme(theme,btn){S.cfg.theme=theme;document.body.className=theme;document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('on',b===btn));toast(`Theme: ${theme}`,'success');},
+  setAccent(color,el){S.cfg.accent=color;document.documentElement.style.setProperty('--accent',color);document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('on',s===el));toast('Accent updated!','success');},
+  exportData(){
+    const data=JSON.stringify({events:S.events,sleepLogs:S.sleepLogs,habits:S.habits,goals:S.goals,substances:S.substances,urges:S.urges,carryover:S.carryover,wakeOverrides:S.wakeOverrides,cfg:S.cfg},null,2);
+    const a=document.createElement('a');a.href='data:text/json;charset=utf-8,'+encodeURIComponent(data);a.download='lifeos-backup.json';a.click();
+    toast('Data exported! 📦','success');
+  },
+  resetStep(){
+    const btn=qs('#reset-btn');
+    if(S._resetStep===0){
+      S._resetStep=1;txt(btn,'Tap again to confirm');btn.style.background='var(--warn)';btn.style.color='#000';
+      setTimeout(()=>{S._resetStep=0;txt(btn,'Reset');btn.style.background='';btn.style.color='';},3000);
+    } else {
+      S._resetStep=0;txt(btn,'Reset');btn.style.background='';btn.style.color='';
+      S.events=[];S.sleepLogs=[];S.urges=[];S.carryover=[];S.wakeOverrides={};
+      S.habits=clone(DEF.habits);S.goals=clone(DEF.goals);S.substances=clone(DEF.substances);
+      reflow();toast('All data reset.','info');
+    }
+  },
+
+  async reqNotif(){
+    if(typeof Notification==='undefined'){toast('Not supported in this browser.','error');return;}
+    const p=await Notification.requestPermission();
+    S.cfg.notifEnabled=p==='granted';
+    toast(p==='granted'?'🔔 Notifications enabled!':p==='denied'?'🔕 Blocked.':'Dismissed.',p==='granted'?'success':p==='denied'?'error':'warning');
+    if(S.page==='settings')renderSettings();
+    if(S.cfg.notifEnabled) App.startNotificationEngine();
+  },
+
+  // ── NOTIFICATION ENGINE ──
+  startNotificationEngine(){
+    // Poll every minute for tasks that need notification
+    setInterval(()=>{
+      const now=new Date(),nowM=now.getHours()*60+now.getMinutes();
+      const isToday=S.date===todayStr();
+      if(!isToday||!S.cfg.notifEnabled) return;
+
+      const remindBefore=5; // Always 5 min prior
+      S.schedule.forEach(b=>{
+        if(b.status==='completed'||b.locked||b.isCarryover) return;
+        const startM=toMins(b.startTime);
+        
+        // 5 min before ALL tasks
+        if(nowM===startM-5&&!b.notif5min){
+          new Notification(`📢 ${b.icon||'📌'} ${b.title}`,{
+            body:`Starting in 5 minutes • ${b.startTime} (${fmtDur(b.em-b.sm)})`,
+            tag:`task-${b.bid}-5min`,
+            requireInteraction:false
+          });
+          b.notif5min=true;
+        }
+        
+        // At start time
+        if(nowM===startM&&!b.notifStart){
+          new Notification(`⏰ NOW: ${b.title}`,{
+            body:`${fmtDur(b.em-b.sm)} • ${b.category}`,
+            tag:`task-${b.bid}-start`,
+            requireInteraction:true
+          });
+          b.notifStart=true;
+        }
+      });
+    },60000); // Check every 60 seconds
+  },
+
+  openModal(id){qs(`#${id}`)?.classList.add('open')},
+  closeModal(id){qs(`#${id}`)?.classList.remove('open')},
+};
+
+// ── EVENT LISTENERS ───────────────────────────────────────────
+qs('#stars').addEventListener('click',e=>{
+  const s=e.target.closest('.star');if(!s)return;
+  S.sleepQ=+s.dataset.v;
+  qs('#stars').querySelectorAll('.star').forEach(x=>x.classList.toggle('on',+x.dataset.v<=S.sleepQ));
+});
+qs('#u-int').addEventListener('input',e=>txt(qs('#u-int-val'),e.target.value));
+qs('#inp-name').addEventListener('change',e=>S.cfg.name=e.target.value.trim());
+qs('#inp-wake-actual').addEventListener('focus',e=>e.target.dataset.touched='1');
+
+// Show/hide prep toggle based on category selection
+qs('#ev-cat').addEventListener('change',e=>{
+  qs('#prep-toggle-wrap').style.display=e.target.value==='event'?'block':'none';
+  qs('#shift-toggle-wrap').style.display=e.target.value==='event'?'block':'none';
+});
+
+// Close modals on Escape
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.querySelectorAll('.mbg.open').forEach(m=>m.classList.remove('open'));
+});
+
+// ── CLOCK ─────────────────────────────────────────────────────
+let _lm=-1;
+setInterval(()=>{
+  const now=new Date(),m=now.getHours()*60+now.getMinutes();
+  if(m===_lm)return;_lm=m;
+  if(m===0){
+    // MIDNIGHT: Send daily progress report BEFORE rolling over
+    if(S.cfg.notifEnabled){
+      const completed=S.schedule.filter(b=>b.status==='completed').length;
+      const total=S.schedule.filter(b=>!b.locked).length;
+      const missed=S.schedule.filter(b=>b.status!=='completed'&&!b.locked&&b.em<(24*60)).length;
+      const studyMissed=S.schedule.filter(b=>b.category==='study'&&b.status!=='completed').length;
+      
+      let reportMsg=`Completed ${completed}/${total} tasks today`;
+      let reportBody=``;
+      if(studyMissed>0) reportBody+=`⚠️ ${studyMissed} study task${studyMissed>1?'s':''} missed\n`;
+      reportBody+=`${missed} total incomplete · ${completed} done`;
+      
+      new Notification(`📊 Daily Report — ${S.date}`,{
+        body:reportBody,
+        tag:'daily-report',
+        requireInteraction:true
+      });
+    }
+    
+    // Then roll over
+    App.autoRollover();
+    S.date=todayStr();
+    Object.values(S.substances).forEach(s=>s.todayCount=0);
+    S.habits.forEach(h=>h.done=false);
+    reflow();return;
+  }
+  if(S.page==='scheduler')renderSched();
+  if(S.page==='dashboard')renderDash();
+},20_000);
+
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reflow();});
+
+// ── INIT ──────────────────────────────────────────────────────
+(function(){
+  document.documentElement.style.setProperty('--accent',S.cfg.accent);
+  document.body.className=S.cfg.theme;
+  qs('#ev-date').value=todayStr(); // Default event date to today
+  
+  // IMPORT: Cloud Engineer Daily Schedule (PDF Data)
+  S.events=[
+    {id:'ev-wake',date:todayStr(),title:'Wake & Water',category:'health',startTime:'15:00',endTime:'15:10',status:'pending',priority:'critical',icon:'💧',notes:'Drink 500ml water immediately. No phone.'},
+    {id:'ev-pray1',date:todayStr(),title:'Shiv Prayer',category:'spiritual',startTime:'15:10',endTime:'15:40',status:'pending',priority:'high',icon:'🤲',notes:'20 min prayer + 10 min breathing. Spiritual start.'},
+    {id:'ev-sun',date:todayStr(),title:'Sunlight Exposure',category:'health',startTime:'15:40',endTime:'16:00',status:'pending',priority:'critical',icon:'☀️',notes:'Outside. No screens. Circadian rhythm reset.'},
+    {id:'ev-brk1',date:todayStr(),title:'Fresh Breakfast',category:'nutrition',startTime:'16:00',endTime:'16:30',status:'pending',priority:'high',icon:'🍽️',notes:'High protein breakfast. See nutrition plan.'},
+    {id:'ev-rev',date:todayStr(),title:'Review Goals',category:'study',startTime:'16:30',endTime:'16:45',status:'pending',priority:'high',icon:'📋',notes:'Daily 3 goals. Check roadmap progress.'},
+    {id:'ev-cloud1',date:todayStr(),title:'Cloud Study - Core',category:'study',startTime:'16:45',endTime:'18:45',status:'pending',priority:'critical',icon:'☁️',notes:'Linux/AWS fundamentals. No phone. Focus.'},
+    {id:'ev-brk2',date:todayStr(),title:'Break - Walk & Rest',category:'health',startTime:'18:45',endTime:'19:00',status:'pending',priority:'high',icon:'🚶',notes:'500ml water. Walk. Eye rest from screen.'},
+    {id:'ev-lunch',date:todayStr(),title:'Lunch',category:'nutrition',startTime:'19:00',endTime:'19:30',status:'pending',priority:'high',icon:'🍛',notes:'High protein meal. See nutrition sheet.'},
+    {id:'ev-cloud2',date:todayStr(),title:'Practical Lab - Hands-On',category:'study',startTime:'19:30',endTime:'21:15',status:'pending',priority:'critical',icon:'💻',notes:'AWS/Linux VM/GitHub. Practical only. Labs.'},
+    {id:'ev-brk3',date:todayStr(),title:'Recovery Break',category:'health',startTime:'21:15',endTime:'21:30',status:'pending',priority:'high',icon:'📝',notes:'Log mood + cravings. Recovery tracking.'},
+    {id:'ev-gym',date:todayStr(),title:'Gym - Recovery Phase',category:'fitness',startTime:'21:30',endTime:'22:15',status:'pending',priority:'high',icon:'💪',notes:'Month 1: walks + stretch. Month 2+: full gym.'},
+    {id:'ev-dinner',date:todayStr(),title:'Dinner',category:'nutrition',startTime:'22:15',endTime:'22:45',status:'pending',priority:'high',icon:'🍲',notes:'Protein-rich meal. High calories for bulk.'},
+    {id:'ev-cloud3',date:todayStr(),title:'Cloud Reading/Docs',category:'study',startTime:'22:45',endTime:'23:30',status:'pending',priority:'high',icon:'📖',notes:'Documentation or cloud book. No labs.'},
+    {id:'ev-read',date:todayStr(),title:'Personal Reading',category:'reading',startTime:'23:30',endTime:'00:00',status:'pending',priority:'medium',icon:'📚',notes:'Book from reading plan. Building focus.'},
+    {id:'ev-wind',date:todayStr(),title:'Wind Down',category:'sleep',startTime:'00:00',endTime:'00:15',status:'pending',priority:'critical',icon:'🌙',notes:'No screens. Dim lights. Breathing exercises.'},
+    {id:'ev-pray2',date:todayStr(),title:'Shiv Prayer - Close Day',category:'spiritual',startTime:'00:15',endTime:'00:35',status:'pending',priority:'high',icon:'🙏',notes:'Reflect. Gratitude. Close the day.'},
+    {id:'ev-sleep',date:todayStr(),title:'Sleep',category:'sleep',startTime:'00:35',endTime:'15:30',status:'pending',priority:'critical',icon:'😴',notes:'Target: 11:30 PM bed, 6:30 AM wake. Recovery.'},
+  ];
+  
+  // Check if notifications were previously enabled
+  if(Notification?.permission==='granted'){
+    S.cfg.notifEnabled=true;
+    App.startNotificationEngine();
+  }
+  reflow();
+})();
+  // ============================================
+// HELPER FUNCTIONS FOR IMPROVED ERROR HANDLING
+// ============================================
+
+/**
+ * Show loading indicator overlay
+ */
+function showLoadingIndicator(message) {
+  // Remove existing loader if any
+  const existing = document.getElementById('api-loader');
+  if (existing) existing.remove();
+  
+  const loader = document.createElement('div');
+  loader.id = 'api-loader';
+  loader.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 30px 50px;
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 9999;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    max-width: 300px;
+  `;
+  loader.innerHTML = `
+    <div style="margin-bottom: 15px; font-size: 32px; animation: spin 1s linear infinite;">
+      ⏳
+    </div>
+    <div style="font-weight: 600;">${message}</div>
+    <div style="font-size: 12px; margin-top: 10px; opacity: 0.7;">Please wait...</div>
+  `;
+  document.body.appendChild(loader);
+}
+
+/**
+ * Hide loading indicator
+ */
+function hideLoadingIndicator() {
+  const loader = document.getElementById('api-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => loader.remove(), 300);
+  }
+}
+
+/**
+ * Test Gemini API connection (call from browser console)
+ */
+async function testGeminiConnection() {
+  console.log('🧪 Testing Gemini API connection...');
+  
+  try {
+    const response = await fetch('/.netlify/functions/generateSchedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sleepTime: '23:00',
+        wakeTime: '06:00',
+        goals: [{ name: 'Test', priority: 'high' }],
+        habits: [{ name: 'Test', category: 'test' }]
+      })
+    });
+    
+    const text = await response.text();
+    console.log('📊 Connection test results:');
+    console.log('   Status:', response.status);
+    console.log('   Content-Type:', response.headers.get('content-type'));
+    console.log('   Is JSON:', text.startsWith('{'));
+    console.log('   Has <!DOCTYPE:', text.includes('<!DOCTYPE'));
+    console.log('   Response length:', text.length);
+    
+    if (response.ok && text.startsWith('{')) {
+      console.log('✅ Gemini API connection successful!');
+      return true;
+    } else {
+      console.error('❌ Gemini API connection failed!');
+      console.error('Response:', text.substring(0, 200));
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Connection test error:', error);
+    return false;
+  }
+}
+
+// Add CSS animation for loading spinner
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
