@@ -1,7 +1,7 @@
 {
   "name": "life-os-smart-netlify",
   "version": "3.3.0",
-  "description": "AI-powered smart scheduler with Cloud Engineer transformation program",
+  "description": "AI-powered smart scheduler with Gemini integration",
   "main": "index.html",
   "scripts": {
     "dev": "netlify dev",
@@ -9,13 +9,13 @@
     "deploy": "netlify deploy --prod"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.20.0"
+    "@google/generative-ai": "^0.1.3"
   },
   "devDependencies": {},
   "keywords": [
     "scheduler",
     "cloud-engineering",
-    "claude-ai",
+    "gemini-ai",
     "netlify"
   ],
   "author": "Cloud Engineer",
