@@ -1856,68 +1856,138 @@ const App={
     
     toast('🤖 Claude analyzing your schedule...', 'info');
     
+    
+  // ============================================
+// IMPROVED API CALL WITH BETTER ERROR HANDLING
+// ============================================
+
+try {
+  // Show loading state
+  showLoadingIndicator('🔄 Generating schedule with Gemini AI...');
+  
+  // Prepare data
+  const claudeInput = {
+    sleepTime: sleepTimeInput,
+    wakeTime: wakeTimeInput,
+    goals: S.goals
+      .filter(g => g.category === 'study' && g.status !== 'completed')
+      .slice(0, 5)
+      .map(g => ({
+        name: g.title || g.name,
+        priority: g.priority || 'medium'
+      })),
+    habits: S.habits
+      .slice(0, 5)
+      .map(h => ({
+        name: h.title || h.name,
+        category: h.category || 'general'
+      }))
+  };
+  
+  console.log('📤 Sending to Gemini API:', claudeInput);
+  
+  // Make API call with better error handling
+  const response = await fetch('/.netlify/functions/generateSchedule', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(claudeInput)
+  });
+  
+  // Log response details
+  console.log('📥 Response status:', response.status);
+  console.log('📥 Response headers:', Object.fromEntries(response.headers));
+  
+  // Get response text first
+  const responseText = await response.text();
+  console.log('📥 Raw response:', responseText.substring(0, 500));
+  
+  // Check if response is valid
+  if (!response.ok) {
+    // Try to parse error
     try {
-      // Prepare data for Claude
-      const claudeInput = {
-        sleepTime: sleepTimeInput,
-        wakeTime: wakeTimeInput,
-        goals: S.goals.filter(g => g.category === 'study' && g.status !== 'completed').slice(0, 5),
-        habits: S.habits.slice(0, 5)
-      };
-      
-      // Call Netlify function
-      const response = await fetch('/.netlify/functions/generateSchedule', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(claudeInput)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Claude failed to generate schedule');
-      }
-      
-      const claudeSchedule = await response.json();
-      
-      // Convert Claude output to app format
-      const schedule = claudeSchedule.schedule.map((item, idx) => ({
-        bid: uid('c' + idx),
-        title: item.title,
-        category: item.category || 'other',
-        icon: getCategoryIcon(item.category),
-        sm: toMins(item.time),
-        em: toMins(item.time) + parseInt(item.duration),
-        startTime: item.time,
-        endTime: toTime(toMins(item.time) + parseInt(item.duration)),
-        status: 'pending',
-        locked: item.locked || false,
-        notes: '',
-        isClaudeGenerated: true
-      }));
-      
-      // Save to app state
-      S.schedule = schedule.sort((a,b) => a.sm - b.sm);
-      
-      // Show warnings if any
-      if (claudeSchedule.warnings && claudeSchedule.warnings.length > 0) {
-        claudeSchedule.warnings.forEach(w => 
-          toast('⚠️ ' + w, 'warning', 4000)
-        );
-      }
-      
-      // Show recommendations
-      if (claudeSchedule.recommendations && claudeSchedule.recommendations.length > 0) {
-        toast('💡 ' + claudeSchedule.recommendations[0], 'info', 3000);
-      }
-      
-      // Show overflow warning if present
-      if (claudeSchedule.overflow) {
-        const available = claudeSchedule.availableHours || 12;
-        const needed = claudeSchedule.totalHours || 24;
-        toast(`⚠️ Schedule overflow: ${needed.toFixed(1)}h needed vs ${available.toFixed(1)}h available`, 'danger', 5000);
-      }
+      const error = JSON.parse(responseText);
+      throw new Error(error.error || `API Error: ${response.status}`);
+    } catch (e) {
+      // If parsing fails, show raw response
+      throw new Error(
+        `API Error ${response.status}: ${responseText.substring(0, 200)}`
+      );
+    }
+  }
+  
+  // Parse JSON response
+  let claudeSchedule;
+  try {
+    claudeSchedule = JSON.parse(responseText);
+  } catch (parseError) {
+    throw new Error(
+      `Invalid JSON response: ${parseError.message}\nResponse: ${responseText.substring(0, 300)}`
+    );
+  }
+  
+  console.log('✅ Parsed schedule:', claudeSchedule);
+  
+  // Convert Claude output to app format
+  const schedule = claudeSchedule.schedule.map((item, idx) => ({
+    bid: uid('c' + idx),
+    title: item.title || 'Untitled',
+    category: item.category || 'other',
+    icon: getCategoryIcon(item.category),
+    sm: toMins(item.time),
+    em: toMins(item.time) + parseInt(item.duration || 60),
+    startTime: item.time,
+    endTime: toTime(toMins(item.time) + parseInt(item.duration || 60)),
+    status: 'pending',
+    locked: item.locked || false,
+    notes: item.notes || '',
+    isClaudeGenerated: true
+  }));
+  
+  // Save to app state
+  S.schedule = schedule.sort((a, b) => a.sm - b.sm);
+  
+  // Show warnings if any
+  if (claudeSchedule.warnings?.length) {
+    claudeSchedule.warnings.forEach(w => 
+      toast('⚠️ ' + w, 'warning', 4000)
+    );
+  }
+  
+  // Show recommendations
+  if (claudeSchedule.recommendations?.length) {
+    toast('💡 ' + claudeSchedule.recommendations[0], 'info', 3000);
+  }
+  
+  // Show overflow warning
+  if (claudeSchedule.overflow) {
+    const available = claudeSchedule.availableHours || 12;
+    const needed = claudeSchedule.totalHours || 24;
+    toast(
+      `⚠️ Schedule overflow: ${needed.toFixed(1)}h needed vs ${available.toFixed(1)}h available`,
+      'danger',
+      5000
+    );
+  }
+  
+  // Refresh UI
+  saveState();
+  renderSchedule();
+  toast('✅ Schedule generated successfully!', 'success', 3000);
+  
+} catch (error) {
+  // Handle errors gracefully
+  console.error('❌ Schedule generation error:', error);
+  toast(
+    '❌ Error: ' + error.message,
+    'danger',
+    5000
+  );
+} finally {
+  // Hide loading indicator
+  hideLoadingIndicator();
+}
       
       S.date = todayStr();
       render();
