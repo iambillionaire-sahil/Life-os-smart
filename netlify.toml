@@ -1,5 +1,5 @@
 [build]
-  command = "echo 'No build step needed'"
+  command = "npm install"
   publish = "."
 
 [functions]
@@ -15,3 +15,12 @@
   from = "/*"
   to = "/index.html"
   status = 200
+  condition = "!{Request.path}.{ext|js|css|json|png|jpg|jpeg|gif|svg}"
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+    Content-Type = "application/json"
