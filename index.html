@@ -2717,6 +2717,106 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
   }
   reflow();
 })();
+  // ============================================
+// HELPER FUNCTIONS FOR IMPROVED ERROR HANDLING
+// ============================================
+
+/**
+ * Show loading indicator overlay
+ */
+function showLoadingIndicator(message) {
+  // Remove existing loader if any
+  const existing = document.getElementById('api-loader');
+  if (existing) existing.remove();
+  
+  const loader = document.createElement('div');
+  loader.id = 'api-loader';
+  loader.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 30px 50px;
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 9999;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    max-width: 300px;
+  `;
+  loader.innerHTML = `
+    <div style="margin-bottom: 15px; font-size: 32px; animation: spin 1s linear infinite;">
+      ⏳
+    </div>
+    <div style="font-weight: 600;">${message}</div>
+    <div style="font-size: 12px; margin-top: 10px; opacity: 0.7;">Please wait...</div>
+  `;
+  document.body.appendChild(loader);
+}
+
+/**
+ * Hide loading indicator
+ */
+function hideLoadingIndicator() {
+  const loader = document.getElementById('api-loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => loader.remove(), 300);
+  }
+}
+
+/**
+ * Test Gemini API connection (call from browser console)
+ */
+async function testGeminiConnection() {
+  console.log('🧪 Testing Gemini API connection...');
+  
+  try {
+    const response = await fetch('/.netlify/functions/generateSchedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sleepTime: '23:00',
+        wakeTime: '06:00',
+        goals: [{ name: 'Test', priority: 'high' }],
+        habits: [{ name: 'Test', category: 'test' }]
+      })
+    });
+    
+    const text = await response.text();
+    console.log('📊 Connection test results:');
+    console.log('   Status:', response.status);
+    console.log('   Content-Type:', response.headers.get('content-type'));
+    console.log('   Is JSON:', text.startsWith('{'));
+    console.log('   Has <!DOCTYPE:', text.includes('<!DOCTYPE'));
+    console.log('   Response length:', text.length);
+    
+    if (response.ok && text.startsWith('{')) {
+      console.log('✅ Gemini API connection successful!');
+      return true;
+    } else {
+      console.error('❌ Gemini API connection failed!');
+      console.error('Response:', text.substring(0, 200));
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Connection test error:', error);
+    return false;
+  }
+}
+
+// Add CSS animation for loading spinner
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(style);
 </script>
 </body>
 </html>
